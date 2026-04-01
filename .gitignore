@@ -1,19 +1,12 @@
-#  Env variables
-.env
-
-# Database local
-*.db
-
-# Python
-__pycache__/
-*.pyc
-
-#  Virtual environment
+# Ignora o ambiente virtual
 venv/
 
-#  IDE
-.idea/
-.vscode/
+# Ignora os arquivos de cache do Python
+__pycache__/
 
-#  System
-.DS_Store
+# Ignora arquivos de banco de dados locais
+*.db
+*.sqlite3
+
+# Ignora o arquivo de variáveis de ambiente (onde futuramente ficará a chave do Gemini)
+.env

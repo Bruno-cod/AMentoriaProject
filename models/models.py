@@ -10,7 +10,6 @@ class Usuario(Base):
     email = Column(String, unique=True, index=True)
     senha_hash = Column(String) # Nunca salvamos a senha em texto puro
     papel = Column(String) # Guardará se é 'aluno' ou 'professor'
-    disciplina = Column(String, nullable=True) # Matéria do professor
     ativo = Column(Boolean, default=True)
 
 class MensagemChat(Base):

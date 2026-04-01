@@ -1,0 +1,12 @@
+# Ignora o ambiente virtual
+venv/
+
+# Ignora os arquivos de cache do Python
+__pycache__/
+
+# Ignora arquivos de banco de dados locais
+*.db
+*.sqlite3
+
+# Ignora o arquivo de variáveis de ambiente (onde futuramente ficará a chave do Gemini)
+.env

@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { ImageIcon, Microphone, File } from "@phosphor-icons/react";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 interface MenuContentProps {
   onSelect: (type: string) => void;
@@ -18,42 +20,68 @@ export const MenuContent = ({ onSelect }: MenuContentProps) => {
   };
 
   return (
-    <div className="absolute bottom-full mb-4 left-0 flex flex-col w-[235px] p-2 rounded-3xl bg-[linear-gradient(176deg,var(--primary-600)_19%,var(--secondary-400)_100%)] shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
-      <div className="flex items-center gap-1 w-full text-white">
+    <div className={cn(
+      "absolute bottom-full left-0 z-50 mb-4",
+      "flex w-[235px] flex-col rounded-3xl p-2 shadow-xl",
+      "bg-[linear-gradient(176deg,var(--primary-600)_19%,var(--secondary-400)_100%)]",
+      "animate-in fade-in slide-in-from-bottom-2 duration-200"
+    )}>
+      <div className="flex w-full items-center gap-1 text-white">
         
-        <button 
+
+        <Button 
+          variant="menuItem"
+          size="none"
           onClick={() => onSelect("imagem")}
-          className="flex flex-col items-center justify-center gap-1.5 p-2 flex-1 rounded-2xl hover:bg-white/20 transition-colors cursor-pointer group"
+          className="group flex-1"
         >
-          <div className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-full group-hover:scale-110 transition-transform">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-transform group-hover:scale-110">
               <ImageIcon size={20} weight="bold" />
           </div>
           <span className="text-caption font-medium">Imagem</span>
-        </button>
+        </Button>
 
-        <button 
+  
+        <Button 
+          variant="menuItem"
+          size="none"
           onClick={() => handleComingSoon("audio")}
-          className="flex flex-col items-center justify-center gap-1.5 p-2 flex-1 rounded-2xl hover:bg-white/20 transition-colors cursor-pointer group"
+          className="group flex-1"
         >
-          <div className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${comingSoon === "audio" ? "bg-secundaria text-white" : "bg-white/10 group-hover:scale-110"}`}>
+          <div className={cn(
+            "flex h-8 w-8 items-center justify-center rounded-full transition-all",
+            comingSoon === "audio" ? "bg-secundaria text-white" : "bg-white/10 group-hover:scale-110"
+          )}>
               <Microphone size={20} weight="bold" />
           </div>
-          <span className={`text-[10px] font-medium text-center leading-tight ${comingSoon === "audio" ? "text-secundaria-200 font-bold" : "text-white"}`}>
+          <span className={cn(
+            "text-[10px] text-center font-medium leading-tight",
+            comingSoon === "audio" ? "font-bold text-secundaria-200" : "text-white"
+          )}>
             {comingSoon === "audio" ? "Em breve" : "Áudio"}
           </span>
-        </button>
+        </Button>
 
-        <button
+       
+        <Button
+          variant="menuItem"
+          size="none"
           onClick={() => handleComingSoon("arquivo")}
-          className="flex flex-col items-center justify-center gap-1.5 p-2 flex-1 rounded-2xl hover:bg-white/20 transition-colors cursor-pointer group"
+          className="group flex-1"
         >
-          <div className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${comingSoon === "arquivo" ? "bg-secundaria text-white" : "bg-white/10 group-hover:scale-110"}`}>
+          <div className={cn(
+            "flex h-8 w-8 items-center justify-center rounded-full transition-all",
+            comingSoon === "arquivo" ? "bg-secundaria text-white" : "bg-white/10 group-hover:scale-110"
+          )}>
               <File size={20} weight="bold" />
           </div>
-          <span className={`text-[10px] font-medium text-center leading-tight ${comingSoon === "arquivo" ? "text-secundaria-200 font-bold" : "text-white"}`}>
+          <span className={cn(
+            "text-[10px] text-center font-medium leading-tight",
+            comingSoon === "arquivo" ? "font-bold text-secundaria-200" : "text-white"
+          )}>
             {comingSoon === "arquivo" ? "Em breve" : "Arquivo"}
           </span>
-        </button>
+        </Button>
 
       </div>
     </div>

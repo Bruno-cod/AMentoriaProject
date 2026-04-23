@@ -28,12 +28,14 @@ export default function ChatPage() {
     isChatFinished,
     handleRateMessage,
     handleFeedbackTextSubmit,
-    clearChat, 
+    clearChat,
   } = useChat();
 
   const [inputValue, setInputValue] = useState("");
   const { initialMessage, initialImage, clearInitialData } = useChatStore();
-  const [activeMenu, setActiveMenu] = useState<"none" | "options" | "upload" | "preview">("none");
+  const [activeMenu, setActiveMenu] = useState<
+    "none" | "options" | "upload" | "preview"
+  >("none");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const initialized = useRef(false);
@@ -86,12 +88,15 @@ export default function ChatPage() {
     }
   };
 
-  const handleFileSelected = useCallback((file: File) => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
-    setActiveMenu("preview");
-  }, [previewUrl]);
+  const handleFileSelected = useCallback(
+    (file: File) => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      setActiveMenu("preview");
+    },
+    [previewUrl],
+  );
 
   const handleSend = () => {
     if (!inputValue.trim() && !previewUrl) return;
@@ -113,7 +118,6 @@ export default function ChatPage() {
       <Sidebar />
 
       <main className="flex-1 flex flex-col relative border-l border-neutras-800">
-
         <Navbar />
 
         <div
@@ -128,7 +132,9 @@ export default function ChatPage() {
                 activeTipIndex={tipCount}
                 rating={msg.rating}
                 onRate={(rating) => handleRateMessage(msg.id, rating)}
-                onSubmitFeedback={(text) => handleFeedbackTextSubmit(msg.id, text)}
+                onSubmitFeedback={(text) =>
+                  handleFeedbackTextSubmit(msg.id, text)
+                }
                 onActionClick={handleAction}
               />
             ))}
@@ -146,13 +152,13 @@ export default function ChatPage() {
 
         <div className="w-full px-6 md:px-10 pb-4 pt-2 bg-neutras-900 border-t border-neutras-800/50">
           <div className="max-w-[800px] mx-auto relative group">
-
-
             {activeMenu === "options" && (
               <div className="absolute bottom-full left-0 mb-4 animate-in slide-in-from-bottom-2 duration-200">
                 <MenuContent
                   onSelect={(type) =>
-                    type === "imagem" ? setActiveMenu("upload") : setActiveMenu("none")
+                    type === "imagem"
+                      ? setActiveMenu("upload")
+                      : setActiveMenu("none")
                   }
                 />
               </div>
@@ -172,7 +178,7 @@ export default function ChatPage() {
                 <ImagePreview
                   image={previewUrl}
                   onCancel={() => {
-                    if (previewUrl) URL.revokeObjectURL(previewUrl); 
+                    if (previewUrl) URL.revokeObjectURL(previewUrl);
                     setPreviewUrl(null);
                     setActiveMenu("upload");
                   }}
@@ -195,15 +201,14 @@ export default function ChatPage() {
             ) : (
               <div className="w-full flex flex-col gap-3 animate-in fade-in zoom-in duration-300">
                 <div className="w-full p-4 bg-neutras-800 border border-neutras-700 rounded-2xl text-neutras-400 text-center text-body-small font-medium italic">
-                  <span aria-hidden="true">🔒</span>
-                  {" "}Esta dúvida foi finalizada. Para uma nova questão, inicie outro chat.
+                  <span aria-hidden="true">🔒</span> Esta dúvida foi finalizada.
+                  Para uma nova questão, inicie outro chat.
                 </div>
                 <button
                   onClick={handleNovaConversa}
                   className="w-full py-3 bg-primaria text-neutras-50 font-semibold text-body-small rounded-xl hover:opacity-90 transition-all active:scale-[0.98]"
                 >
-                  <span aria-hidden="true">✨</span>
-                  {" "}Iniciar Nova Dúvida
+                  <span aria-hidden="true">✨</span> Iniciar Nova Dúvida
                 </button>
               </div>
             )}
@@ -213,7 +218,6 @@ export default function ChatPage() {
         <div className="pb-2 bg-neutras-900 shrink-0">
           <Footer />
         </div>
-
       </main>
     </div>
   );

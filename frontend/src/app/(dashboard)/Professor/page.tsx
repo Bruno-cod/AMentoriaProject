@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { GraduationCap, Folder, WarningCircle } from "@phosphor-icons/react";
-
+import { Tabs, TabsContent } from "@/components/ui/Tabs";
+import { DashboardTabs } from "@/components/features/professor/DashboardTabs";
 import { StudentsTable } from "@/components/features/professor/StudentsTable";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { SearchBar } from "@/components/ui/SearchBar";
@@ -13,6 +13,8 @@ import { ChatHistoryData } from "@/types/chat";
 import { Student } from "@/types/student";
 import { fetchStudents } from "@/lib/services/alunos";
 import { fetchAllHistory } from "@/lib/services/historico";
+
+
 
 export default function ProfessorDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -74,10 +76,7 @@ export default function ProfessorDashboard() {
       <div className="flex-1 flex flex-col p-8 md:p-12">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
           <div>
-            <h1 className="text-h2 text-neutras-50 font-bold">
-              Painel do Monitor
-            </h1>
-
+            <h1 className="text-h2 text-neutras-50 font-bold">Painel do Monitor</h1>
             <p className="text-neutras-400 text-body-small mt-2">
               Acompanhe seus alunos e gerencie o material da IA.
             </p>
@@ -85,93 +84,46 @@ export default function ProfessorDashboard() {
 
           {activeTab === "alunos" && (
             <div className="w-full md:w-auto">
-              <SearchBar
-                value={searchTerm}
-                onChange={setSearchTerm}
-                placeholder="Pesquisar alunos..."
-              />
+              <SearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Pesquisar alunos..." />
             </div>
           )}
         </div>
 
-        <div className="flex gap-6 border-b border-neutras-800 mb-6">
-          <button
-            onClick={() => setActiveTab("alunos")}
-            className={`pb-3 text-body-small font-semibold transition-colors border-b-2 flex items-center gap-2 ${
-              activeTab === "alunos"
-                ? "border-primaria text-primaria"
-                : "border-transparent text-neutras-500 hover:text-neutras-50"
-            }`}
-          >
-            <GraduationCap
-              size={20}
-              weight={activeTab === "alunos" ? "fill" : "regular"}
-            />
-            Meus Alunos
-          </button>
+        <Tabs 
+          value={activeTab} 
+          onValueChange={(value) => setActiveTab(value as any)} 
+          className="flex-1 flex flex-col min-h-0"
+        >
+          <DashboardTabs />
 
-          <button
-            onClick={() => setActiveTab("arquivos")}
-            className={`pb-3 text-body-small font-semibold transition-colors border-b-2 flex items-center gap-2 ${
-              activeTab === "arquivos"
-                ? "border-primaria text-primaria"
-                : "border-transparent text-neutras-500 hover:text-neutras-50"
-            }`}
-          >
-            <Folder
-              size={20}
-              weight={activeTab === "arquivos" ? "fill" : "regular"}
-            />
-            Base de Conhecimento
-          </button>
+          <div className="flex-1 min-h-0 overflow-y-auto pr-4 pb-4 scrollbar-thin scrollbar-thumb-neutras-700 scrollbar-track-transparent">
+            
+            <TabsContent value="alunos" className="m-0 focus-visible:ring-0">
+              {isLoadingAlunos ? (
+                <div className="flex justify-center items-center h-32 text-neutras-400">Carregando alunos...</div>
+              ) : (
+                <StudentsTable students={alunosFiltrados} searchTerm={searchTerm} />
+              )}
+            </TabsContent>
 
-          <button
-            onClick={() => setActiveTab("alertas")}
-            className={`pb-3 text-body-small font-semibold transition-colors border-b-2 flex items-center gap-2 ${
-              activeTab === "alertas"
-                ? "border-erro text-erro"
-                : "border-transparent text-neutras-500 hover:text-neutras-50"
-            }`}
-          >
-            <WarningCircle
-              size={20}
-              weight={activeTab === "alertas" ? "fill" : "regular"}
-            />
-            Alertas de IA
-          </button>
-        </div>
+            <TabsContent value="arquivos" className="m-0 focus-visible:ring-0">
+              <FileManager refreshKey={refreshKey} />
+            </TabsContent>
 
-        <div className="flex-1 min-h-0 overflow-y-auto pr-4 pb-4 scrollbar-thin scrollbar-thumb-neutras-700 scrollbar-track-transparent">
-          {activeTab === "alunos" &&
-            (isLoadingAlunos ? (
-              <div className="flex justify-center items-center h-32 text-neutras-400 text-body-small">
-                Carregando lista de alunos...
-              </div>
-            ) : (
-              <StudentsTable
-                students={alunosFiltrados}
-                searchTerm={searchTerm}
-              />
-            ))}
+            <TabsContent value="alertas" className="m-0 focus-visible:ring-0">
+              {isLoadingAlerts ? (
+                <div className="flex justify-center items-center h-32 text-neutras-400">Carregando alertas...</div>
+              ) : (
+                <AlertReport allHistoryData={allHistory} />
+              )}
+            </TabsContent>
 
-          {activeTab === "arquivos" && <FileManager refreshKey={refreshKey} />}
-
-          {activeTab === "alertas" &&
-            (isLoadingAlerts ? (
-              <div className="flex justify-center items-center h-32 text-neutras-400 text-body-small">
-                Carregando alertas...
-              </div>
-            ) : (
-              <AlertReport allHistoryData={allHistory} />
-            ))}
-        </div>
+          </div>
+        </Tabs>
+        
       </div>
 
-      <UploadModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={handleUploadSuccess}
-      />
+      <UploadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSuccess={handleUploadSuccess} />
     </div>
   );
 }

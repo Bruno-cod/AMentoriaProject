@@ -153,7 +153,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           </Button>
           
           <Button 
-            variant="primary"
+            variant="default"
             onClick={handleUpload}
             disabled={!selectedFile || isUploading}
             className="flex-1 py-3 flex items-center justify-center gap-2 !text-sm disabled:opacity-50 disabled:cursor-not-allowed"

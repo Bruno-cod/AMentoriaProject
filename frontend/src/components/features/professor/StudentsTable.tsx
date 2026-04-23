@@ -4,7 +4,9 @@ import { useState } from "react";
 import { StudentHistoryListModal } from "@/components/features/professor/StudentHistoryListModal";
 import { Student } from "@/types/student"; 
 import { formatShortDate } from "@/lib/formatters"; 
-import { Eye } from "@phosphor-icons/react"; 
+import { Eye } from "@phosphor-icons/react";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 export interface StudentsTableProps {
   students: Student[];
@@ -71,15 +73,21 @@ export function StudentsTable({ students, searchTerm }: StudentsTableProps) {
                     </td>
 
                     <td className="p-4 text-center">
-                      <button
+                      <Button
+                        variant="outline"
+                        size="none"
                         onClick={() =>
                           handleOpenHistory(student.name, student.email)
                         }
-                        className="text-xs font-semibold text-neutras-400 hover:text-secundaria border border-neutras-700 hover:border-secundaria/50 bg-neutras-800 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 mx-auto cursor-pointer"
+                        className={cn(
+                          "mx-auto flex items-center gap-1.5 rounded-lg px-3 py-1.5",
+                          "border-neutras-700 bg-neutras-800 text-xs font-semibold text-neutras-400",
+                          "transition-all hover:border-secundaria/50 hover:bg-neutras-800 hover:text-secundaria"
+                        )}
                       >
                         <Eye size={14} weight="bold" />
                         Ver
-                      </button>
+                      </Button>
                     </td>
 
                     <td className="p-4 text-neutras-500 text-sm whitespace-nowrap">

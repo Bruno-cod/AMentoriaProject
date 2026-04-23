@@ -28,10 +28,7 @@ export function HistoryModal({ isOpen, onClose, chatData }: HistoryModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 font-poppins">
-      
-      <div 
-        className="w-full max-w-3xl flex flex-col bg-neutras-900 border border-neutras-800 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[85vh]"
-      >
+      <div className="w-full max-w-3xl flex flex-col bg-neutras-900 border border-neutras-800 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[85vh]">
         <div className="flex items-center justify-between p-4 px-6 border-b border-neutras-800 bg-neutras-900/80 backdrop-blur-md">
           <div>
             <h2 className="text-body-large font-bold text-neutras-50 line-clamp-1">
@@ -41,8 +38,8 @@ export function HistoryModal({ isOpen, onClose, chatData }: HistoryModalProps) {
               {formatLongDate(chatData.date)}
             </span>
           </div>
-          
-          <button 
+
+          <button
             onClick={onClose}
             className="p-2 text-neutras-400 hover:text-neutras-50 hover:bg-neutras-800 rounded-lg transition-colors cursor-pointer"
             title="Fechar"
@@ -55,14 +52,18 @@ export function HistoryModal({ isOpen, onClose, chatData }: HistoryModalProps) {
         <div className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth bg-[radial-gradient(circle_at_top_right,var(--primary-900),transparent_40%)]">
           <div className="max-w-[800px] mx-auto w-full">
             {chatData.messages.map((msg, index) => (
-              <MessageBubble
+              <div
                 key={msg.id || `msg-history-${index}`}
-                {...msg}
-                activeTipIndex={-1} 
-                onActionClick={() => console.log("Ação bloqueada: Modo visualização")}
-                onRate={() => console.log("Apenas visualização")}
-                onSubmitFeedback={() => console.log("Apenas visualização")}
-              />
+                className="pointer-events-none select-text"
+              >
+                <MessageBubble
+                  {...msg}
+                  activeTipIndex={-1}
+                  onActionClick={() => {}}
+                  onRate={() => {}}
+                  onSubmitFeedback={() => {}}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -75,13 +76,13 @@ export function HistoryModal({ isOpen, onClose, chatData }: HistoryModalProps) {
               </>
             ) : (
               <>
-                <Eye size={14} weight="bold" /> Modo de visualização de histórico
+                <Eye size={14} weight="bold" /> Modo de visualização de
+                histórico
               </>
             )}
           </span>
         </div>
       </div>
-      
     </div>
   );
 }

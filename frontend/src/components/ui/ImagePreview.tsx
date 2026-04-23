@@ -1,6 +1,8 @@
 "use client";
 
 import { X, ArrowsLeftRight, PaperPlaneRight } from "@phosphor-icons/react";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 interface ImagePreviewProps {
   image: string;
@@ -14,32 +16,53 @@ export function ImagePreview({
   onConfirm,
 }: ImagePreviewProps) {
   return (
-    <div className="absolute bottom-full mb-4 left-0 flex flex-col w-[290px] p-3 rounded-[20px] bg-white border-2 border-neutras-200 shadow-2xl animate-in fade-in zoom-in duration-200 z-50">
-      <div className="relative w-full h-[180px] rounded-xl overflow-hidden bg-neutras-100 mb-3">
-        <img src={image} alt="Preview" className="w-full h-full object-cover" />
-        <button
+    <div className={cn(
+      "absolute bottom-full left-0 z-50 mb-4 flex w-[290px] flex-col",
+      "rounded-[20px] border-2 border-neutras-200 bg-white p-3 shadow-2xl",
+      "animate-in fade-in zoom-in duration-200"
+    )}>
+      
+      <div className="relative mb-3 h-[180px] w-full overflow-hidden rounded-xl bg-neutras-100">
+        <img src={image} alt="Preview" className="h-full w-full object-cover" />
+        
+        <Button
+          size="icon" 
           onClick={onCancel}
-          className="absolute top-2 right-2 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors cursor-pointer"
+          className={cn(
+            "absolute right-2 top-2 h-8 w-8 rounded-full",
+            "bg-black/50 text-white hover:bg-black/70 hover:text-white"
+          )}
         >
           <X size={16} weight="bold" />
-        </button>
+        </Button>
       </div>
 
       <div className="flex gap-2">
-        <button
+   
+        <Button
+          variant="outline"
+          size="none"
           onClick={onCancel}
-          className="flex-1 py-2 flex items-center justify-center gap-2 rounded-lg border-2 border-neutras-200 text-neutras-600 font-bold hover:bg-neutras-50 transition-colors text-sm cursor-pointer"
+          className={cn(
+            "flex flex-1 items-center justify-center gap-2 rounded-lg py-2",
+            "border-neutras-200 text-sm font-bold text-neutras-600 hover:bg-neutras-50 hover:text-neutras-900"
+          )}
         >
           <ArrowsLeftRight size={16} weight="bold" />
           Trocar
-        </button>
-        <button
+        </Button>
+
+        <Button
+          size="none"
           onClick={onConfirm}
-          className="flex-1 py-2 flex items-center justify-center gap-2 rounded-lg bg-secundaria text-white font-bold hover:opacity-90 transition-opacity text-sm shadow-md cursor-pointer"
+          className={cn(
+            "flex flex-1 items-center justify-center gap-2 rounded-lg py-2",
+            "bg-secundaria text-sm font-bold text-white shadow-md transition-opacity hover:scale-100 hover:bg-secundaria hover:opacity-90"
+          )}
         >
           <PaperPlaneRight size={16} weight="bold" />
           Enviar
-        </button>
+        </Button>
       </div>
     </div>
   );

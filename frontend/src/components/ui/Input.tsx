@@ -1,27 +1,25 @@
+import * as React from "react"
 
+import { cn } from "@/lib/utils"
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  icon?: React.ReactNode;
-  onMenuClick?: () => void;
-}
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {}
 
-export function Input({ icon, className, onMenuClick, ...props }: InputProps) {
-  return (
-    <div className="w-full relative flex items-center p-3 bg-white rounded-lg border-2 border-neutras-200 shadow-[0px_4px_15px_-3px_rgba(107,33,168,0.3)] transition-all focus-within:border-primaria/50">
-      
-      
-      {icon && (
-        <button
-          onClick={onMenuClick}
-          className="absolute left-5 bg-secundaria p-2 rounded-lg text-white font-bold flex items-center justify-center hover:scale-105 transition-transform cursor-pointer z-10"
-        >
-          {icon}
-        </button>
-      )}
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, ...props }, ref) => {
+    return (
       <input
+        type={type}
+        className={cn(
+          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
+        ref={ref}
         {...props}
-        className={`w-full bg-transparent outline-none text-body-large text-neutras-900 placeholder:text-neutras-400 text-center px-12 ${className}`}
       />
-    </div>
-  );
-}
+    )
+  }
+)
+Input.displayName = "Input"
+
+export { Input }

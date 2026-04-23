@@ -5,6 +5,9 @@ import { FileText, PencilSimple, Trash } from "@phosphor-icons/react";
 import { KnowledgeFile } from "@/types/files"; 
 import { fetchKnowledgeFiles, deleteKnowledgeFile, renameKnowledgeFile } from "@/lib/services/files"; 
 import { formatLongDate } from "@/lib/formatters";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
+
 
 export function FileManager({ refreshKey = 0 }: { refreshKey?: number }) {
   const [files, setFiles] = useState<KnowledgeFile[]>([]);
@@ -55,7 +58,7 @@ export function FileManager({ refreshKey = 0 }: { refreshKey?: number }) {
   };
 
   return (
-    <div className="bg-neutras-900 border border-neutras-800 rounded-2xl overflow-hidden shadow-sm mt-8">
+    <div className="bg-neutras-900 border border-neutras-800 rounded-2xl overflow-hidden shadow-sm">
       <div className="p-5 border-b border-neutras-800 flex justify-between items-center">
         <div>
           <h2 className="text-white font-semibold">
@@ -139,35 +142,44 @@ export function FileManager({ refreshKey = 0 }: { refreshKey?: number }) {
                   <td className="p-4 flex justify-end gap-2">
                     {editingId === file.id ? (
                       <>
-                        <button
+                        <Button
+                          variant='outline'
+                          size='none'
                           onClick={() => saveEdit(file.id)}
-                          className="text-xs font-semibold text-primaria hover:text-white border border-primaria/50 hover:bg-primaria bg-primaria/10 px-3 py-1.5 rounded-lg transition-all"
+                          className={cn("text-xs font-semibold text-primaria hover:text-white border border-primaria/50 hover:bg-primaria bg-primaria/10 px-3 py-1.5 rounded-lg transition-all")} 
                         >
                           Salvar
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant='outline'
+                          size='none'
                           onClick={() => setEditingId(null)}
-                          className="text-xs font-semibold text-neutras-400 hover:text-white border border-neutras-700 bg-neutras-800 px-3 py-1.5 rounded-lg transition-all"
+                          className={cn("text-xs font-semibold text-neutras-400 hover:text-white border border-neutras-700 bg-neutras-800 px-3 py-1.5 rounded-lg transition-all")}
                         >
                           Cancelar
-                        </button>
+                        </Button>
                       </>
                     ) : (
                       <>
-                        <button
+                        <Button
+                          variant='outline'
+                          size='none'
                           onClick={() => startEditing(file)}
-                          className="text-xs font-semibold text-neutras-400 hover:text-white border border-neutras-700 hover:border-neutras-500 bg-neutras-800 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5"
+                          className={cn("text-xs font-semibold text-neutras-400 hover:text-white border border-neutras-700 hover:border-neutras-500 bg-neutras-800 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5"
+                        )}
                         >
                           <PencilSimple size={14} weight="bold" />
                           Editar
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant='outline'
+                          size='none'
                           onClick={() => handleDelete(file.id)}
-                          className="text-xs font-semibold text-neutras-400 hover:text-erro border border-neutras-700 hover:border-erro/50 bg-neutras-800 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5"
+                          className={cn("text-xs font-semibold text-neutras-400 hover:text-erro border border-neutras-700 hover:border-erro/50 bg-neutras-800 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5")}
                         >
                           <Trash size={14} weight="bold" />
                           Excluir
-                        </button>
+                        </Button>
                       </>
                     )}
                   </td>

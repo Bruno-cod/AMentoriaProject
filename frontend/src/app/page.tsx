@@ -122,7 +122,6 @@ export default function Page() {
             </span>
             .
           </h1>
-          <h3 className="text-h3 text-neutras-800">Qual a sua dúvida?</h3>
         </div>
 
         <div className="relative w-full">

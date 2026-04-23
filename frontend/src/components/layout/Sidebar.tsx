@@ -87,7 +87,7 @@ export const Sidebar = ({ onUploadClick, onManageFilesClick }: SidebarProps) => 
                 className="w-full !px-4 !py-3 !rounded-xl bg-primaria/10 !text-primaria hover:bg-primaria/20 border border-primaria/20 !text-sm font-semibold flex items-center justify-center gap-3 transition-all cursor-pointer"
               >
                 <UploadSimple size={20} weight="bold" />
-                Novo Upload
+                Novo upload
               </Button>
             </div>
 
@@ -136,7 +136,7 @@ export const Sidebar = ({ onUploadClick, onManageFilesClick }: SidebarProps) => 
               <span className="group-hover:rotate-90 transition-transform flex items-center justify-center">
                 <Plus size={20} weight="bold" />
               </span>
-              Nova Dúvida
+              Nova dúvida
             </Button>
 
             <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2">
@@ -195,13 +195,14 @@ export const Sidebar = ({ onUploadClick, onManageFilesClick }: SidebarProps) => 
           </div>
 
           {isMounted && user && (
-            <button
+            <Button
+              variant={'ghost'}
+              size={'icon'}
               onClick={handleLogout}
-              className="p-2 text-neutras-500 hover:text-secundaria hover:bg-neutras-800 rounded-lg transition-all shrink-0 cursor-pointer"
               title="Sair da conta"
             >
               <SignOut size={20} weight="bold" />
-            </button>
+            </Button>
           )}
         </div>
       </aside>

@@ -42,12 +42,13 @@ export function Navbar() {
           amentor<span className="text-secundaria">IA</span>.
         </h2>
         <p className="text-caption text-neutras-400 font-medium uppercase tracking-wider mt-1">
-          Seu tutor interativo • ENEM 
+          Seu tutor interativo para o ENEM 
         </p>
       </div>
 
       {!isLogged && (
-        <Button variant="primary" onClick={handleLoginClick}>
+        <Button variant="default" onClick={handleLoginClick} className="bg-[linear-gradient(176deg,var(--primary-600)_19%,var(--secondary-400)_100%)] border-0 text-white shadow-lg hover:opacity-90 hover:scale-105 transition-all"
+>
           Fazer login
         </Button>
       )}

@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: amentoria-postgres
+    environment:
+      POSTGRES_USER: amentoria_user
+      POSTGRES_PASSWORD: amentoria_pass
+      POSTGRES_DB: amentoria
+    ports:
+      - "5433:5432"
+    volumes:
+      - amentoria_postgres_data:/var/lib/postgresql
+
+volumes:
+  amentoria_postgres_data:

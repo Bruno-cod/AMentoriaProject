@@ -3,4 +3,5 @@ export interface Student {
   name: string;
   email: string;
   lastInteraction: string;
+  visto: boolean;
 }          

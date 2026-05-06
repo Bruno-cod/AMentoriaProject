@@ -11,6 +11,7 @@ interface MessageBubbleProps {
   suggestions?: { label: string; value: string }[];
   activeTipIndex?: number;
   rating?: "up" | "down";
+  isReadOnly?: boolean;
   onRate?: (rating: "up" | "down") => void;
   onSubmitFeedback?: (text: string) => void; 
   onActionClick?: (value: string) => void;
@@ -27,6 +28,7 @@ export function MessageBubble({
   onRate,
   onSubmitFeedback, 
   onActionClick,
+  isReadOnly
 }: MessageBubbleProps) {
   const isAI = role === "ai";
 
@@ -72,6 +74,7 @@ export function MessageBubble({
               <button
                 key={`${suggestion.value}-${index}`}
                 onClick={() => onActionClick?.(suggestion.value)}
+                disabled={isReadOnly}
                 className="px-4 py-1.5 bg-neutras-800 border border-primaria/30 text-neutras-100 text-[12px] font-bold rounded-full hover:bg-primaria/20 hover:border-primaria transition-all cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
               >
                 {suggestion.label}
@@ -93,6 +96,7 @@ export function MessageBubble({
               rating={rating}
               onRate={onRate}
               onSubmitFeedback={onSubmitFeedback}
+              isReadOnly={isReadOnly}
             />
           </div>
         )}

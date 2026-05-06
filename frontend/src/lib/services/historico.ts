@@ -16,8 +16,16 @@ export async function fetchAllHistory(): Promise<ChatHistoryData[]> {
 }
 
 export async function fetchStudentHistory(email: string): Promise<ChatHistoryData[]> {
-  const response = await fetch(`/api/historico?email=${email}`);
-  if (!response.ok) throw new Error("Falha ao buscar histórico do aluno");
+  
+  const safeEmail = encodeURIComponent(email);
+  const response = await fetch(`/api/historico?email=${safeEmail}`);
+
+  if (!response.ok) {
+   
+    console.error(`Erro na API de Histórico: Status ${response.status}`);
+    throw new Error("Falha ao buscar histórico do aluno");
+  }
+
   return response.json();
 }
 

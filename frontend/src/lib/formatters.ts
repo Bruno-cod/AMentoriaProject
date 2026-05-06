@@ -43,3 +43,23 @@ export const formatFileSize = (bytes: number): string => {
   
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
+
+export const parseDateBrToTime = (dateString: string): number => {
+  if (!dateString) return 0;
+  
+  if (dateString.includes('-')) {
+    const time = new Date(dateString).getTime();
+    return isNaN(time) ? 0 : time;
+  }
+
+  const partes = dateString.split(/[\/\s:]+/); 
+  
+  if (partes.length >= 3) {
+    const dia = Number(partes[0]);
+    const mes = Number(partes[1]) - 1; 
+    const ano = Number(partes[2]);
+    return new Date(ano, mes, dia).getTime();
+  }
+
+  return 0; 
+};

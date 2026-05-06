@@ -1,20 +1,37 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, PencilSimple, Trash } from "@phosphor-icons/react";
+import { FileText, PencilSimple, Trash, CaretUp, CaretDown } from "@phosphor-icons/react";
 import { KnowledgeFile } from "@/types/files"; 
 import { fetchKnowledgeFiles, deleteKnowledgeFile, renameKnowledgeFile } from "@/lib/services/files"; 
 import { formatLongDate } from "@/lib/formatters";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { useOrdenacao } from "@/lib/ordenecao";
 
-
-export function FileManager({ refreshKey = 0 }: { refreshKey?: number }) {
+export function FileManager({ refreshKey = 0, searchTerm = "" }: { refreshKey?: number, searchTerm?: string; }) {
   const [files, setFiles] = useState<KnowledgeFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+
+  const arquivosFiltrados = files.filter((file) =>
+    file.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const { 
+    dadosOrdenados: sortedFiles,
+    ordenarPor, 
+    direcao, 
+    handleSort 
+  } = useOrdenacao(
+    arquivosFiltrados,
+    'recente',     
+    'uploadDate',   
+    'name',        
+    'id'          
+  );
 
   useEffect(() => {
     const loadFiles = async () => {
@@ -73,13 +90,56 @@ export function FileManager({ refreshKey = 0 }: { refreshKey?: number }) {
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-neutras-800/50 text-neutras-500 text-xs uppercase tracking-wider">
-              <th className="p-4 font-semibold">Nome do Arquivo</th>
+            <tr className="bg-neutras-800/50 text-neutras-500 text-xs uppercase tracking-wider select-none">
+              
+              <th 
+                className="p-4 font-semibold cursor-pointer hover:bg-neutras-800 transition-colors group"
+                onClick={() => handleSort('alfabetico')}
+              >
+                <div className="flex items-center gap-2">
+                  Nome do Arquivo
+                  {direcao === 'desc' && ordenarPor === 'alfabetico' ? (
+                    <CaretUp size={14} weight="bold" className="text-primaria opacity-100 transition-opacity" />
+                  ) : (
+                    <CaretDown 
+                      size={14} 
+                      weight="bold" 
+                      className={cn(
+                        "transition-opacity",
+                        ordenarPor === 'alfabetico' ? "opacity-100 text-primaria" : "opacity-0 group-hover:opacity-50"
+                      )} 
+                    />
+                  )}
+                </div>
+              </th>
+
               <th className="p-4 font-semibold">Tamanho</th>
-              <th className="p-4 font-semibold">Data de Envio</th>
+
+              <th 
+                className="p-4 font-semibold cursor-pointer hover:bg-neutras-800 transition-colors group"
+                onClick={() => handleSort('recente')}
+              >
+                <div className="flex items-center gap-2">
+                  Data de Envio
+                  {direcao === 'desc' && ordenarPor === 'recente' ? (
+                    <CaretUp size={14} weight="bold" className="text-primaria opacity-100 transition-opacity" />
+                  ) : (
+                    <CaretDown 
+                      size={14} 
+                      weight="bold" 
+                      className={cn(
+                        "transition-opacity",
+                        ordenarPor === 'recente' ? "opacity-100 text-primaria" : "opacity-0 group-hover:opacity-50"
+                      )} 
+                    />
+                  )}
+                </div>
+              </th>
+
               <th className="p-4 font-semibold text-right">Ações</th>
             </tr>
           </thead>
+          
           <tbody className="divide-y divide-neutras-800">
             {isLoading ? (
               <tr>
@@ -93,7 +153,7 @@ export function FileManager({ refreshKey = 0 }: { refreshKey?: number }) {
                   </div>
                 </td>
               </tr>
-            ) : files.length === 0 ? (
+            ) : sortedFiles.length === 0 ? (
               <tr>
                 <td
                   colSpan={4}
@@ -103,7 +163,7 @@ export function FileManager({ refreshKey = 0 }: { refreshKey?: number }) {
                 </td>
               </tr>
             ) : (
-              files.map((file) => (
+              sortedFiles.map((file) => (
                 <tr
                   key={file.id}
                   className="hover:bg-neutras-800/30 transition-colors group"
@@ -136,7 +196,7 @@ export function FileManager({ refreshKey = 0 }: { refreshKey?: number }) {
                   </td>
 
                   <td className="p-4 text-neutras-500 text-sm whitespace-nowrap">
-                    {formatLongDate(file.uploadDate)}
+                    {formatLongDate(String(file.uploadDate))}
                   </td>
 
                   <td className="p-4 flex justify-end gap-2">

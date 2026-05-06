@@ -16,7 +16,8 @@ export async function POST(request: Request) {
     email: dadosDoCadastro.email,
     progress: 0,
     status: "ativo",
-    lastInteraction: new Date().toLocaleDateString("pt-BR")
+    lastInteraction: new Date().toLocaleDateString("pt-BR"),
+    visto: false
   };
 
   
@@ -35,15 +36,15 @@ export async function DELETE(request: Request) {
 
 export async function PATCH(request: Request) {
   const body = await request.json();
-  const { email, lastInteraction } = body;
+  const { email, lastInteraction, visto } = body;
 
   const index = baseDeDadosAlunos.findIndex(a => a.email === email);
 
   if (index !== -1) {
     baseDeDadosAlunos[index] = {
       ...baseDeDadosAlunos[index],
-      lastInteraction: lastInteraction,
-      
+      ...(lastInteraction !== undefined && { lastInteraction }), 
+      ...(visto !== undefined && { visto }) 
     };
     
     return NextResponse.json({ 
@@ -59,7 +60,8 @@ export async function PATCH(request: Request) {
       email: email,
       status: "active", 
       lastInteraction: lastInteraction,
-      avatar: undefined 
+      avatar: undefined,
+      visto: false 
     };
     
     baseDeDadosAlunos.push(novoAluno);

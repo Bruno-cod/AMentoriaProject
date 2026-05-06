@@ -26,3 +26,19 @@ export async function createStudent(data: { name: string; email: string }): Prom
 
   return response.json();
 }
+
+export async function updateStudentStatus(email: string, visto: boolean) {
+  const response = await fetch("/api/alunos", {
+    method: "PATCH",
+    headers: { 
+      "Content-Type": "application/json" 
+    },
+    body: JSON.stringify({ email, visto }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Falha ao atualizar o status do aluno.");
+  }
+
+  return response.json();
+}

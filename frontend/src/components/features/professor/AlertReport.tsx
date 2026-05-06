@@ -1,26 +1,14 @@
 "use client";
 
-import { ChatHistoryData } from "@/types/chat";
 import { formatLongDate } from "@/lib/formatters";
+import { AlertItem } from "@/types/alertas";
 
 interface AlertReportProps {
-  allHistoryData: ChatHistoryData[];
+  alerts: AlertItem[];
+  searchTerm: string; 
 }
 
-export function AlertReport({ allHistoryData }: AlertReportProps) {
-  const alerts = allHistoryData.flatMap((chat) =>
-    chat.messages
-      .filter((msg) => msg.rating === "down")
-      .map((msg) => ({
-        chatId: chat.id,
-        topic: chat.topic,
-        studentEmail: chat.alunoEmail,
-        iaResponse: msg.content,
-        studentFeedback: msg.feedbackText,
-        date: chat.date,
-      })),
-  );
-
+export function AlertReport({ alerts, searchTerm }: AlertReportProps) {
   return (
     <div className="bg-neutras-900 border border-neutras-800 rounded-2xl overflow-hidden shadow-sm">
       <div className="p-5 border-b border-neutras-800">
@@ -31,13 +19,15 @@ export function AlertReport({ allHistoryData }: AlertReportProps) {
       <div className="p-6 space-y-4">
         {alerts.length === 0 ? (
           <p className="text-neutras-400 italic text-sm text-center py-8">
-            Nenhum feedback negativo pendente. Bom trabalho! 
+            {searchTerm 
+              ? `Nenhum alerta encontrado para "${searchTerm}".`
+              : "Nenhum feedback negativo pendente. Bom trabalho!"}
           </p>
         ) : (
           <div className="grid gap-4">
             {alerts.map((alert, index) => (
               <div
-                key={index}
+                key={`${alert.chatId}-${index}`}
                 className="bg-neutras-800/20 border border-erro/20 rounded-xl p-4"
               >
                 <div className="flex justify-between items-center mb-3">
@@ -45,7 +35,7 @@ export function AlertReport({ allHistoryData }: AlertReportProps) {
                     Alerta de Qualidade
                   </span>
                   <span className="text-[12px] text-neutras-400">
-                    {formatLongDate(alert.date)}
+                    {formatLongDate(String(alert.date))}
                   </span>
                 </div>
 
@@ -74,6 +64,5 @@ export function AlertReport({ allHistoryData }: AlertReportProps) {
         )}
       </div>
     </div>
-    
   );
 }

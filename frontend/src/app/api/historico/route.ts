@@ -1,23 +1,37 @@
 import { NextResponse } from "next/server";
-import { mockChatHistory } from "@/mocks"
+import { mockChatHistory } from "@/mocks/historico"
 
 let baseDeDadosMock: any[] = [...mockChatHistory];
 
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const email = searchParams.get('email');
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
 
-  if (email) {
-    const historicoDoAluno = baseDeDadosMock.filter(chat => chat.alunoEmail === email);
+    if (email) {
+      const historicoDoAluno = baseDeDadosMock.filter(chat => chat.alunoEmail === email);
+      
+      historicoDoAluno.sort((a, b) => {
+        const dataA = a.date ? new Date(a.date).getTime() : 0;
+        const dataB = b.date ? new Date(b.date).getTime() : 0;
+        return dataB - dataA;
+      });
+      
+      return NextResponse.json(historicoDoAluno, { status: 200 });
+    }
+
+    return NextResponse.json(baseDeDadosMock, { status: 200 });
     
-    historicoDoAluno.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  } catch (error) {
     
-    return NextResponse.json(historicoDoAluno);
+    console.error("🚨 Erro no GET da API de histórico:", error);
+    
+    return NextResponse.json(
+      { error: "Erro interno do servidor ao buscar o histórico." }, 
+      { status: 500 }
+    );
   }
-
-
-  return NextResponse.json(baseDeDadosMock);
 }
 
 export async function POST(request: Request) {
@@ -66,4 +80,5 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+} 
+

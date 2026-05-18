@@ -12,6 +12,7 @@ export function useChat() {
   const [isChatFinished, setIsChatFinished] = useState(false);
   const [classification, setClassification] = useState<ClassificationResult | null>(null);
   const lastProcessedUserMsgId = useRef<string | null>(null);
+  const sessaoChatIdRef = useRef<number>(Math.floor(Date.now() / 1000));
 
   const {
     messages,
@@ -25,17 +26,23 @@ export function useChat() {
     clearState,
   } = useChatState();
 
-  const { resetChatId } = useChatSync({ 
-    messages, 
-    isChatFinished, 
-    userEmail: user?.email 
+  const { resetChatId } = useChatSync({
+    messages,
+    isChatFinished,
+    userEmail: user?.email,
   });
+
+  const getChatContext = useCallback(() => ({
+    alunoId: user?.id ?? 0,
+    sessaoChatId: sessaoChatIdRef.current,
+  }), [user?.id]);
 
   const clearChat = useCallback(() => {
     clearState();
     setClassification(null);
     setIsChatFinished(false);
     lastProcessedUserMsgId.current = null;
+    sessaoChatIdRef.current = Math.floor(Date.now() / 1000);
     resetChatId();
   }, [clearState, resetChatId]);
 
@@ -47,10 +54,10 @@ export function useChat() {
     addMessage({ id: userMsgId, role: "user", content: "Pode me explicar isso passo a passo?" });
     setIsAiThinking(true);
 
-    const aiMsg = await chatFlowService.generateExplanation(classification);
+    const aiMsg = await chatFlowService.generateExplanation(classification, getChatContext());
     addMessage(aiMsg);
     setIsAiThinking(false);
-  }, [classification, addMessage, setIsAiThinking]);
+  }, [classification, addMessage, setIsAiThinking, getChatContext]);
 
   const handleQuestionFlow = useCallback(async () => {
     const userMsgId = generateId("req-q");
@@ -60,14 +67,14 @@ export function useChat() {
     addMessage({ id: userMsgId, role: "user", content: "Gostaria de resolver uma questão sobre isso." });
     setIsAiThinking(true);
 
-    const aiMsg = await chatFlowService.generateQuestion(classification);
+    const aiMsg = await chatFlowService.generateQuestion(classification, getChatContext());
     addMessage(aiMsg);
     setIsAiThinking(false);
-  }, [classification, addMessage, setIsAiThinking]);
+  }, [classification, addMessage, setIsAiThinking, getChatContext]);
 
   const handleAnswer = useCallback(async (value: string) => {
     setIsAiThinking(true);
-    const { message, isCorrect, userMsg } = await chatFlowService.processAnswer(value, classification);
+    const { message, isCorrect, userMsg } = await chatFlowService.processAnswer(value, classification, getChatContext());
 
     if (lastProcessedUserMsgId.current === userMsg.id) return;
     lastProcessedUserMsgId.current = userMsg.id;
@@ -77,11 +84,11 @@ export function useChat() {
     setIsAiThinking(false);
 
     if (isCorrect) setIsChatFinished(true);
-  }, [classification, addMessage, setIsAiThinking]);
+  }, [classification, addMessage, setIsAiThinking, getChatContext]);
 
   const handleTipFlow = useCallback(async () => {
     setIsAiThinking(true);
-    const { message, newTipCount, isFinal, userMsg } = await chatFlowService.generateTip(tipCount, classification);
+    const { message, newTipCount, isFinal, userMsg } = await chatFlowService.generateTip(tipCount, classification, getChatContext());
 
     if (lastProcessedUserMsgId.current === userMsg.id) return;
     lastProcessedUserMsgId.current = userMsg.id;
@@ -92,7 +99,7 @@ export function useChat() {
     setIsAiThinking(false);
 
     if (isFinal) setIsChatFinished(true);
-  }, [tipCount, classification, addMessage, setIsAiThinking, setTipCount]);
+  }, [tipCount, classification, addMessage, setIsAiThinking, setTipCount, getChatContext]);
 
   const sendMessage = useCallback(async (text: string, imageInput?: string | File | null) => {
     let imageUrl: string | null | undefined = null;
@@ -112,18 +119,21 @@ export function useChat() {
 
     try {
       const isFirstMessage = messages.filter((m) => m.role === "user").length === 0;
-      
-      const { message, classification: newClassification } = await chatFlowService.processInitialMessage(text, isFirstMessage);
+      const { message, classification: newClassification } = await chatFlowService.processInitialMessage(
+        text,
+        isFirstMessage,
+        getChatContext()
+      );
 
       if (newClassification) setClassification(newClassification);
       addMessage(message);
     } catch (error) {
       console.error("Erro ao processar:", error);
-      addMessage({ id: generateId("ai"), role: "ai", content: "Ops, tive um problema ao processar. Pode tentar novamente?" });
+      addMessage({ id: generateId("ai"), role: "ai", content: "Ops, tive um problema ao conectar com o servidor. O backend está rodando?" });
     } finally {
       setIsAiThinking(false);
     }
-  }, [messages, addMessage, setIsAiThinking]);
+  }, [messages, addMessage, setIsAiThinking, getChatContext]);
 
   return {
     messages,

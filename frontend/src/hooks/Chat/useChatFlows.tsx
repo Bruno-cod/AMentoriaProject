@@ -2,51 +2,63 @@ import { ClassificationResult } from "@/types/enem";
 import { Message, Suggestion } from "@/types/chat";
 import { classifyMessage } from "@/lib/classifyMessage";
 import { generateId } from "@/hooks/Chat/useChatState";
-import {
-  mockExplanations,
-  mockQuestions,
-  mockTipSets,
-  getQuestionSuggestions,
-} from "@/mocks/chat/index";
+import { enviarMensagem } from "@/lib/services/chat";
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+interface ChatContext {
+  alunoId: number;
+  sessaoChatId: number;
+}
 
 export const chatFlowService = {
-  async processInitialMessage(text: string, isFirstMessage: boolean): Promise<{ message: Message; classification?: ClassificationResult }> {
-    let currentClassification;
+  async processInitialMessage(
+    text: string,
+    isFirstMessage: boolean,
+    ctx: ChatContext
+  ): Promise<{ message: Message; classification?: ClassificationResult }> {
+    let currentClassification: ClassificationResult | undefined;
 
     if (isFirstMessage && text) {
       currentClassification = await classifyMessage(text);
-    } else {
-      await delay(1500);
     }
+
+    const resposta = await enviarMensagem({
+      aluno_id: ctx.alunoId,
+      sessao_chat_id: ctx.sessaoChatId,
+      texto_duvida: text,
+    });
 
     const message: Message = {
       id: generateId("ai"),
       role: "ai",
-      content: isFirstMessage
-        ? `Identifiquei que sua dúvida é sobre **${currentClassification?.topic}**. Como você gostaria de prosseguir?`
-        : "Entendido! Continuando nossa análise...",
-      suggestions: isFirstMessage
-        ? [
-            { label: "📖 Explicação", value: "flow_explanation" },
-            { label: "📝 Gerar Questões", value: "flow_questions" },
-            { label: "💡 Dicas", value: "flow_tips" },
-          ]
-        : undefined,
+      content: resposta.mensagem_ia,
+      suggestions: [
+        { label: "📖 Explicação", value: "flow_explanation" },
+        { label: "📝 Gerar Questões", value: "flow_questions" },
+        { label: "💡 Dicas", value: "flow_tips" },
+      ],
     };
 
     return { message, classification: currentClassification };
   },
 
-  async generateExplanation(classification: ClassificationResult | null): Promise<Message> {
-    await delay(1500);
-    const explanation = mockExplanations.find((e) => e.competencyCode === classification?.competencyCode) || mockExplanations[0];
+  async generateExplanation(
+    classification: ClassificationResult | null,
+    ctx: ChatContext
+  ): Promise<Message> {
+    const texto = classification?.topic
+      ? `Pode me explicar sobre ${classification.topic} passo a passo?`
+      : "Pode me explicar esse assunto passo a passo?";
+
+    const resposta = await enviarMensagem({
+      aluno_id: ctx.alunoId,
+      sessao_chat_id: ctx.sessaoChatId,
+      texto_duvida: texto,
+    });
 
     return {
       id: generateId("exp"),
       role: "ai",
-      content: `Com certeza! Vamos entender mais sobre **${explanation.topic}**:\n\n${explanation.content}\n\nFicou mais claro agora? Como quer continuar?`,
+      content: resposta.mensagem_ia,
       suggestions: [
         { label: "📝 Testar com Questões", value: "flow_questions" },
         { label: "💡 Ver Dicas", value: "flow_tips" },
@@ -54,80 +66,101 @@ export const chatFlowService = {
     };
   },
 
-  async generateQuestion(classification: ClassificationResult | null): Promise<Message> {
-    await delay(1500);
-    const question = mockQuestions.find((q) => q.competencyCode === classification?.competencyCode) || mockQuestions[0];
+  async generateQuestion(
+    classification: ClassificationResult | null,
+    ctx: ChatContext
+  ): Promise<Message> {
+    const texto = classification?.topic
+      ? `Gere uma questão de múltipla escolha no estilo ENEM sobre ${classification.topic} com 5 alternativas (A, B, C, D, E) e me diga qual é a correta ao final.`
+      : "Gere uma questão de múltipla escolha no estilo ENEM sobre esse assunto com 5 alternativas (A, B, C, D, E) e me diga qual é a correta ao final.";
+
+    const resposta = await enviarMensagem({
+      aluno_id: ctx.alunoId,
+      sessao_chat_id: ctx.sessaoChatId,
+      texto_duvida: texto,
+    });
 
     return {
       id: generateId("q"),
       role: "ai",
-      content: `Aqui está uma questão do ENEM sobre **${question.topic}** para testar seu conhecimento:\n\n${question.content}`,
-      suggestions: getQuestionSuggestions(question),
+      content: resposta.mensagem_ia,
+      suggestions: [
+        { label: "💡 Pedir Dica", value: "flow_tips" },
+        { label: "📖 Ver Explicação", value: "flow_explanation" },
+      ],
     };
   },
 
-  async processAnswer(value: string, classification: ClassificationResult | null): Promise<{ message: Message; isCorrect: boolean; userMsg: Message }> {
-    const [actionType, answerLabel] = value.split("|");
-    const isCorrect = actionType === "answer_correct";
+  async processAnswer(
+    value: string,
+    classification: ClassificationResult | null,
+    ctx: ChatContext
+  ): Promise<{ message: Message; isCorrect: boolean; userMsg: Message }> {
+    const [, answerLabel] = value.split("|");
 
     const userMsg: Message = {
       id: generateId("req-ans"),
       role: "user",
-      content: answerLabel ? `Vou apostar na alternativa: **${answerLabel}**` : "Vou apostar nessa alternativa!",
+      content: answerLabel ? `Minha resposta é a alternativa: **${answerLabel}**` : "Essa é minha resposta.",
     };
 
-    await delay(1500);
-    const question = mockQuestions.find((q) => q.competencyCode === classification?.competencyCode) || mockQuestions[0];
+    const resposta = await enviarMensagem({
+      aluno_id: ctx.alunoId,
+      sessao_chat_id: ctx.sessaoChatId,
+      texto_duvida: userMsg.content,
+    });
 
     const aiMsg: Message = {
       id: generateId("ans"),
       role: "ai",
-      content: isCorrect
-        ? `🎉 **Correto!** Você mandou muito bem!\n\n**Explicação:** ${question.explanation}`
-        : `❌ **Quase lá!** A resposta não é essa.\n\nTente novamente ou peça uma dica para te ajudar.`,
-      suggestions: isCorrect
-        ? []
-        : [
-            { label: "💡 Pedir Dicas", value: "flow_tips" },
-            { label: "📝 Tentar Novamente", value: "flow_questions" },
-          ],
+      content: resposta.mensagem_ia,
+      suggestions: [
+        { label: "💡 Pedir Dicas", value: "flow_tips" },
+        { label: "📝 Tentar Novamente", value: "flow_questions" },
+      ],
     };
 
-    return { message: aiMsg, isCorrect, userMsg };
+    return { message: aiMsg, isCorrect: false, userMsg };
   },
 
-  async generateTip(tipCount: number, classification: ClassificationResult | null): Promise<{ message: Message; newTipCount: number; isFinal: boolean; userMsg: Message }> {
+  async generateTip(
+    tipCount: number,
+    classification: ClassificationResult | null,
+    ctx: ChatContext
+  ): Promise<{ message: Message; newTipCount: number; isFinal: boolean; userMsg: Message }> {
     const nextLevel = tipCount + 1;
+    const isFinal = nextLevel > 3;
+
     const userMsg: Message = {
       id: generateId("req-tip"),
       role: "user",
-      content: nextLevel <= 3 ? `Dica #${nextLevel}, por favor!` : "Ver resultado final.",
+      content: isFinal ? "Ver resultado final." : `Dica #${nextLevel}, por favor!`,
     };
 
-    await delay(1000);
-    const tipSet = mockTipSets.find((t) => t.competencyCode === classification?.competencyCode) || mockTipSets[0];
+    const texto = isFinal
+      ? "Me dê a resolução completa e final desse problema."
+      : `Me dê a dica número ${nextLevel} de 3 para resolver esse problema. Seja socrático e não entregue a resposta diretamente.`;
 
-    if (nextLevel > 3) {
-      const finalAiMsg: Message = {
-        id: generateId("res"),
-        role: "ai",
-        content: `**Conclusão:**\n${tipSet.finalAnswer}`,
-      };
-      return { message: finalAiMsg, newTipCount: 0, isFinal: true, userMsg };
-    }
+    const resposta = await enviarMensagem({
+      aluno_id: ctx.alunoId,
+      sessao_chat_id: ctx.sessaoChatId,
+      texto_duvida: texto,
+    });
 
-    const suggestions: Suggestion[] = nextLevel === 3
+    const suggestions: Suggestion[] = isFinal
+      ? []
+      : nextLevel === 3
         ? [{ label: "✅ Ver resultado final", value: "action_next_tip" }]
         : [{ label: "💡 Próxima dica", value: "action_next_tip" }];
 
     const aiMsg: Message = {
       id: generateId("tip"),
       role: "ai",
-      content: tipSet.tips[nextLevel - 1].content,
+      content: resposta.mensagem_ia,
       suggestions,
       tipLevel: nextLevel,
     };
 
-    return { message: aiMsg, newTipCount: nextLevel, isFinal: false, userMsg };
-  }
+    return { message: aiMsg, newTipCount: isFinal ? 0 : nextLevel, isFinal, userMsg };
+  },
 };

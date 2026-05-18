@@ -6,14 +6,14 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 load_dotenv()
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./amentoria.db")
 
-if not SQLALCHEMY_DATABASE_URL:
-    raise ValueError("DATABASE_URL not defined in .env file")
+is_sqlite = SQLALCHEMY_DATABASE_URL.startswith("sqlite")
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
-    pool_pre_ping=True  
+    connect_args={"check_same_thread": False} if is_sqlite else {},
+    pool_pre_ping=True,
 )
 
 SessionLocal = sessionmaker(

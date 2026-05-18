@@ -3,6 +3,31 @@ from pydantic import BaseModel
 from typing import Optional
 
 # -------------------------------------------------------------------
+# SCHEMAS DE AUTENTICAÇÃO
+# -------------------------------------------------------------------
+
+class UserCreate(BaseModel):
+    name: str
+    email: str
+    password: str
+    role: str  # "aluno" ou "professor"
+    subject: Optional[str] = None
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    role: str
+    subject: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+# -------------------------------------------------------------------
 # SCHEMAS DE ENTRADA (O que o Frontend envia para o Backend)
 # -------------------------------------------------------------------
 

@@ -1,36 +1,26 @@
 # main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import chat
+from routers import chat, auth
 from core.database import engine
-from models import models # Importa os modelos para o SQLAlchemy saber quais tabelas criar
+from models import models
 
 models.Base.metadata.create_all(bind=engine)
 
-# Inicializa a aplicação FastAPI com metadados do projeto
-app = FastAPI(
-    title="Tutor Socrático ENEM",
-    version="0.1.0"
-)
+app = FastAPI(title="Tutor Socrático ENEM", version="0.1.0")
 
-# Configuração do CORS (Cross-Origin Resource Sharing)
-# Isso é obrigatório para que o seu Frontend consiga conversar com este Backend
-# sem ser bloqueado pelo navegador por questões de segurança.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Em produção, trocaremos "*" pela URL real do seu frontend
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
-    allow_methods=["*"], # Permite todos os métodos (GET, POST, PUT, DELETE)
-    allow_headers=["*"], # Permite todos os cabeçalhos
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
+app.include_router(auth.router, prefix="/api/auth", tags=["Autenticação"])
 app.include_router(chat.router, prefix="/api/chat", tags=["Tutoria e Chat"])
 
-# Rota básica de verificação de saúde (Health Check)
+
 @app.get("/")
 def home():
-    # Retorna um JSON simples para testarmos se o servidor está no ar
-    return {"status": "API do Tutor Socrático está online e aguardando conexões!"}
-
-# Futuramente, vamos importar e incluir as rotas de alunos e professores aqui
-# Exemplo: app.include_router(chat_router, prefix="/api/chat")
+    return {"status": "API do Tutor Socrático está online!"}

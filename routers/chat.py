@@ -1,52 +1,61 @@
 # routers/chat.py
 from fastapi import APIRouter, Depends
-from schemas.schemas import DuvidaAlunoRequest, RespostaTutorResponse 
 from sqlalchemy.orm import Session
+
+from schemas.schemas import DuvidaAlunoRequest, RespostaTutorResponse
 from core.database import get_db
 from services import crud
+from services.gemini_service import GeminiService
 
 router = APIRouter()
+_gemini: GeminiService | None = None
+
+
+def get_gemini() -> GeminiService:
+    global _gemini
+    if _gemini is None:
+        _gemini = GeminiService()
+    return _gemini
+
 
 @router.post("/enviar", response_model=RespostaTutorResponse)
 def enviar_duvida(requisicao: DuvidaAlunoRequest, db: Session = Depends(get_db)):
-    
-    # 1. Salva a pergunta do aluno no banco de dados
     if requisicao.texto_duvida:
         crud.salvar_mensagem(
             db=db,
             aluno_id=requisicao.aluno_id,
             sessao_chat_id=requisicao.sessao_chat_id,
             remetente="aluno",
-            conteudo=requisicao.texto_duvida
+            conteudo=requisicao.texto_duvida,
         )
 
-    # (FUTURO) Aqui nós buscaremos o histórico e chamaremos a API do Gemini
-    
-    # Resposta falsa (Mock) temporária
-    texto_resposta_ia = "[MOCK] Olá! Que excelente dúvida. Antes de dar a resposta, o que você acha que acontece com a fórmula de Bhaskara nesta situação?"
-    
-    # 2. Salva a resposta da IA no banco de dados
+    mensagens_anteriores = crud.buscar_historico_sessao(db=db, sessao_chat_id=requisicao.sessao_chat_id)
+    historico = [{"remetente": m.remetente, "conteudo": m.conteudo} for m in mensagens_anteriores]
+
+    texto_resposta_ia = get_gemini().gerar_resposta(
+        pergunta_aluno=requisicao.texto_duvida or "",
+        historico=historico,
+    )
+
     crud.salvar_mensagem(
         db=db,
         aluno_id=requisicao.aluno_id,
         sessao_chat_id=requisicao.sessao_chat_id,
         remetente="ia",
-        conteudo=texto_resposta_ia
+        conteudo=texto_resposta_ia,
     )
-    
-    # 3. Devolve a resposta para o frontend
+
+    total_interacoes = len([m for m in mensagens_anteriores if m.remetente == "aluno"]) + 1
+    limite_atingido = total_interacoes >= 3
+
     return RespostaTutorResponse(
         mensagem_ia=texto_resposta_ia,
-        numero_interacao=1,
-        limite_atingido=False,
-        exibir_questao_fixacao=False
+        numero_interacao=total_interacoes,
+        limite_atingido=limite_atingido,
+        exibir_questao_fixacao=limite_atingido,
     )
+
 
 @router.get("/historico/{sessao_chat_id}")
 def ver_historico(sessao_chat_id: int, db: Session = Depends(get_db)):
-    """
-    Rota temporária para testarmos se as mensagens estão sendo salvas no banco.
-    """
-    # Usamos a função que criamos no crud.py para buscar as mensagens
-    mensagens = crud.buscar_historico_sessao(db=db, sessao_chat_id=sessao_chat_id)
-    return mensagens
+    return crud.buscar_historico_sessao(db=db, sessao_chat_id=sessao_chat_id)

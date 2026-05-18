@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
-import { createStudent } from "@/lib/services/alunos";
+import { registerUser, loginUser } from "@/lib/services/auth";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +23,7 @@ import { authSchema, type AuthFormValues } from "@/lib/validations/auth";
 
 export default function AuthForm() {
   const router = useRouter();
-  const { register, login } = useAuthStore();
+  const { setUser } = useAuthStore();
   const [apiError, setApiError] = useState("");
 
   const form = useForm<AuthFormValues>({
@@ -45,36 +45,27 @@ export default function AuthForm() {
   const onSubmit = async (values: AuthFormValues) => {
     setApiError("");
 
-    if (values.isCreatingAccount) {
-      if (values.role === "aluno") {
-        try {
-          await createStudent({ name: values.name || "", email: values.email });
-        } catch (err) {
-          console.error("Erro ao salvar aluno na API:", err);
-        }
-      }
-
-      const success = register({
-        name: values.name || "",
-        email: values.email,
-        role: values.role,
-        subject: values.role === "professor" ? values.subject : undefined,
-      });
-
-      if (!success) {
-        setApiError("Este e-mail já está cadastrado.");
-        return;
-      }
-
-      router.push(values.role === "aluno" ? "/Aluno" : "/Professor");
-    } else {
-      const loggedUser = login(values.email);
-
-      if (loggedUser) {
-        router.push(loggedUser.role === "aluno" ? "/Aluno" : "/Professor");
+    try {
+      if (values.isCreatingAccount) {
+        const userData = await registerUser({
+          name: values.name || "",
+          email: values.email,
+          password: values.password,
+          role: values.role,
+          subject: values.role === "professor" ? values.subject : undefined,
+        });
+        setUser(userData);
+        router.push(userData.role === "aluno" ? "/Aluno" : "/Professor");
       } else {
-        setApiError("Nenhuma conta encontrada com este e-mail.");
+        const userData = await loginUser({
+          email: values.email,
+          password: values.password,
+        });
+        setUser(userData);
+        router.push(userData.role === "aluno" ? "/Aluno" : "/Professor");
       }
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : "Erro ao conectar com o servidor.");
     }
   };
 

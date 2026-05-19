@@ -12,7 +12,7 @@ export function useChat() {
   const [isChatFinished, setIsChatFinished] = useState(false);
   const [classification, setClassification] = useState<ClassificationResult | null>(null);
   const lastProcessedUserMsgId = useRef<string | null>(null);
-  const sessaoChatIdRef = useRef<number>(Math.floor(Date.now() / 1000));
+  const sessaoChatIdRef = useRef<string>(crypto.randomUUID());
 
   const {
     messages,
@@ -32,9 +32,9 @@ export function useChat() {
     userEmail: user?.email,
   });
 
-  const getChatContext = useCallback(() => ({
-    alunoId: user?.id ?? 0,
-    sessaoChatId: sessaoChatIdRef.current,
+ const getChatContext = useCallback(() => ({
+    alunoId: user?.id ? user.id.toString() : "",
+    sessaoChatId: sessaoChatIdRef.current ? sessaoChatIdRef.current.toString() : "",
   }), [user?.id]);
 
   const clearChat = useCallback(() => {
@@ -42,7 +42,7 @@ export function useChat() {
     setClassification(null);
     setIsChatFinished(false);
     lastProcessedUserMsgId.current = null;
-    sessaoChatIdRef.current = Math.floor(Date.now() / 1000);
+    sessaoChatIdRef.current = crypto.randomUUID();
     resetChatId();
   }, [clearState, resetChatId]);
 

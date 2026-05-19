@@ -1,7 +1,7 @@
 # main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import chat
+from routers import auth, chat, alunos, historico, arquivos
 from core.database import engine
 from models import models # Importa os modelos para o SQLAlchemy saber quais tabelas criar
 
@@ -25,6 +25,10 @@ app.add_middleware(
 )
 
 app.include_router(chat.router, prefix="/api/chat", tags=["Tutoria e Chat"])
+app.include_router(alunos.router, prefix="/api/alunos", tags=["Gestão de Alunos"])
+app.include_router(historico.router, prefix="/api/historico", tags=["Histórico de Chat"])
+app.include_router(arquivos.router, prefix="/api/files", tags=["Arquivos de Conhecimento"])
+app.include_router(auth.router, prefix="/api/auth", tags=["Autenticação"])
 
 # Rota básica de verificação de saúde (Health Check)
 @app.get("/")

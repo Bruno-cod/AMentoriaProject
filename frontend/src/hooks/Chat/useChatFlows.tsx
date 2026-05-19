@@ -4,9 +4,10 @@ import { classifyMessage } from "@/lib/classifyMessage";
 import { generateId } from "@/hooks/Chat/useChatState";
 import { enviarMensagem } from "@/lib/services/chat";
 
+// 1. Corrigido de number para string para suportar o UUID do banco
 interface ChatContext {
-  alunoId: number;
-  sessaoChatId: number;
+  alunoId: string;
+  sessaoChatId: string;
 }
 
 export const chatFlowService = {
@@ -21,10 +22,11 @@ export const chatFlowService = {
       currentClassification = await classifyMessage(text);
     }
 
+    // 2. Corrigido os nomes dos campos para o camelCase que a API espera
     const resposta = await enviarMensagem({
-      aluno_id: ctx.alunoId,
-      sessao_chat_id: ctx.sessaoChatId,
-      texto_duvida: text,
+      alunoId: ctx.alunoId,
+      chatId: ctx.sessaoChatId,
+      textoDuvida: text,
     });
 
     const message: Message = {
@@ -50,9 +52,9 @@ export const chatFlowService = {
       : "Pode me explicar esse assunto passo a passo?";
 
     const resposta = await enviarMensagem({
-      aluno_id: ctx.alunoId,
-      sessao_chat_id: ctx.sessaoChatId,
-      texto_duvida: texto,
+      alunoId: ctx.alunoId,
+      chatId: ctx.sessaoChatId,
+      textoDuvida: texto,
     });
 
     return {
@@ -75,9 +77,9 @@ export const chatFlowService = {
       : "Gere uma questão de múltipla escolha no estilo ENEM sobre esse assunto com 5 alternativas (A, B, C, D, E) e me diga qual é a correta ao final.";
 
     const resposta = await enviarMensagem({
-      aluno_id: ctx.alunoId,
-      sessao_chat_id: ctx.sessaoChatId,
-      texto_duvida: texto,
+      alunoId: ctx.alunoId,
+      chatId: ctx.sessaoChatId,
+      textoDuvida: texto,
     });
 
     return {
@@ -105,9 +107,9 @@ export const chatFlowService = {
     };
 
     const resposta = await enviarMensagem({
-      aluno_id: ctx.alunoId,
-      sessao_chat_id: ctx.sessaoChatId,
-      texto_duvida: userMsg.content,
+      alunoId: ctx.alunoId,
+      chatId: ctx.sessaoChatId,
+      textoDuvida: userMsg.content,
     });
 
     const aiMsg: Message = {
@@ -142,9 +144,9 @@ export const chatFlowService = {
       : `Me dê a dica número ${nextLevel} de 3 para resolver esse problema. Seja socrático e não entregue a resposta diretamente.`;
 
     const resposta = await enviarMensagem({
-      aluno_id: ctx.alunoId,
-      sessao_chat_id: ctx.sessaoChatId,
-      texto_duvida: texto,
+      alunoId: ctx.alunoId,
+      chatId: ctx.sessaoChatId,
+      textoDuvida: texto,
     });
 
     const suggestions: Suggestion[] = isFinal

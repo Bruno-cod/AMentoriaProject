@@ -1,9 +1,10 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface ChatRequest {
-  aluno_id: number;
-  sessao_chat_id: number;
-  texto_duvida: string;
+  alunoId: string;      
+  chatId: string;        
+  textoDuvida: string;   
+  imagemBase64?: string | null; 
 }
 
 export interface ChatResponse {

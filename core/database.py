@@ -1,21 +1,29 @@
-# core/database.py
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from dotenv import load_dotenv
 
-# 1. A URL de conexão. Aqui usamos o SQLite para gerar um arquivo local.
-# No futuro, mudaremos para algo como "postgresql://usuario:senha@localhost/tutor_db"
-SQLALCHEMY_DATABASE_URL = "sqlite:///./tutor_banco_local.db"
+# Carrega as variáveis do arquivo .env
+load_dotenv()
 
-# 2. Cria o "Motor" que se comunica com o banco
-# O connect_args é uma exigência específica do SQLite no FastAPI
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+# 1. Busca a URL do .env. Se o arquivo estiver vazio, usa o SQLite como padrão de testes.
+# Altere o valor padrão abaixo se quiser mudar o nome do arquivo SQLite local.
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./tutor_banco_local.db")
 
-# 3. Cria a fábrica de sessões (as conversas do nosso backend com o banco)
+# 2. Cria o "Motor" adaptando-se ao banco escolhido
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    # Configuração específica e necessária para o SQLite funcionar com o FastAPI
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    )
+else:
+    # Configuração para o PostgreSQL do Docker (usa a porta 5433 definida no seu .env)
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+
+# 3. Cria a fábrica de sessões
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 4. A classe Base. Todos os nossos modelos de tabelas vão herdar dela.
+# 4. A classe Base para os modelos herdarem
 Base = declarative_base()
 
 def get_db():

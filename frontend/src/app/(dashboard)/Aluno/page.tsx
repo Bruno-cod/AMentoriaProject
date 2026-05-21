@@ -121,6 +121,7 @@ export default function ChatPage() {
                 activeTipIndex={tipCount}
                 rating={msg.rating}
                 isReadOnly={isChatFinished}
+                isHistoryView={false}
                 onRate={(rating) => handleRateMessage(msg.id, rating)}
                 onSubmitFeedback={(text) => handleFeedbackTextSubmit(msg.id, text)}
                 onActionClick={handleAction}

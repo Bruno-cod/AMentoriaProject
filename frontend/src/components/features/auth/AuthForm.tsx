@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { registerUser, loginUser } from "@/lib/services/auth";
-
+import { createStudent } from "@/lib/services/alunos";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -54,6 +54,18 @@ export default function AuthForm() {
           role: values.role,
           subject: values.role === "professor" ? values.subject : undefined,
         });
+        
+        if (values.role === "aluno") {
+            try {
+                await createStudent({ 
+                    name: values.name || "", 
+                    email: values.email 
+                });
+            } catch (studentErr) {
+                console.error("Aviso: Falha ao sincronizar tabela de alunos:", studentErr);
+            }
+        }
+
         setUser(userData);
         router.push(userData.role === "aluno" ? "/Aluno" : "/Professor");
       } else {
@@ -67,7 +79,7 @@ export default function AuthForm() {
     } catch (err) {
       setApiError(err instanceof Error ? err.message : "Erro ao conectar com o servidor.");
     }
-  };
+};
 
   const inputClass = `
     w-full rounded-xl border border-neutras-700 bg-neutras-800

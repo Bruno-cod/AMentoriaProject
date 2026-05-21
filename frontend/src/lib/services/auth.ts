@@ -1,7 +1,7 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export interface UserData {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: "aluno" | "professor";

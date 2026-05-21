@@ -26,7 +26,8 @@ export function useChat() {
     clearState,
   } = useChatState();
 
-  const { resetChatId } = useChatSync({
+  useChatSync({
+    chatId: sessaoChatIdRef.current,
     messages,
     isChatFinished,
     userEmail: user?.email,
@@ -42,9 +43,14 @@ export function useChat() {
     setClassification(null);
     setIsChatFinished(false);
     lastProcessedUserMsgId.current = null;
+<<<<<<< Updated upstream
     sessaoChatIdRef.current = Math.floor(Date.now() / 1000);
     resetChatId();
   }, [clearState, resetChatId]);
+=======
+    sessaoChatIdRef.current = crypto.randomUUID();
+  }, [clearState]);
+>>>>>>> Stashed changes
 
   const handleExplanationFlow = useCallback(async () => {
     const userMsgId = generateId("req-exp");

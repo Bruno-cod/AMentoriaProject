@@ -9,8 +9,10 @@ interface SyncChatParams {
   isFinished: boolean;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export async function fetchAllHistory(): Promise<ChatHistoryData[]> {
-  const response = await fetch("/api/historico");
+  const response = await fetch(`${API_URL}/api/historico`);
   if (!response.ok) throw new Error("Falha ao buscar o histórico geral");
   return response.json();
 }
@@ -18,7 +20,7 @@ export async function fetchAllHistory(): Promise<ChatHistoryData[]> {
 export async function fetchStudentHistory(email: string): Promise<ChatHistoryData[]> {
   
   const safeEmail = encodeURIComponent(email);
-  const response = await fetch(`/api/historico?email=${safeEmail}`);
+  const response = await fetch(`${API_URL}/api/historico?email=${safeEmail}`);
 
   if (!response.ok) {
    
@@ -31,7 +33,7 @@ export async function fetchStudentHistory(email: string): Promise<ChatHistoryDat
 
 export async function syncChatHistoryWithAPI({ chatId, email, topic, messages, isFinished }: SyncChatParams) {
   try {
-    await fetch("/api/historico", {
+    await fetch(`${API_URL}/api/historico`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -45,7 +47,7 @@ export async function syncChatHistoryWithAPI({ chatId, email, topic, messages, i
 
    
     if (isFinished) {
-      await fetch("/api/alunos", {
+      await fetch(`${API_URL}/api/alunos`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

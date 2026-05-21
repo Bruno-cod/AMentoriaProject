@@ -1,20 +1,16 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect } from "react";
 import { Message } from "@/types/chat";
 import { syncChatHistoryWithAPI } from "@/lib/services/historico";
-import { generateId } from "./useChatState";
 
 interface UseChatSyncProps {
+  chatId: string;
   messages: Message[];
   isChatFinished: boolean;
   userEmail?: string;
 }
 
-export function useChatSync({ messages, isChatFinished, userEmail }: UseChatSyncProps) {
-  const chatIdRef = useRef(generateId("hist"));
-
-  const resetChatId = useCallback(() => {
-    chatIdRef.current = generateId("hist");
-  }, []);
+export function useChatSync({ chatId, messages, isChatFinished, userEmail }: UseChatSyncProps) {
+  
 
   useEffect(() => {
     if (messages.length === 0 || !userEmail) return;
@@ -27,14 +23,12 @@ export function useChatSync({ messages, isChatFinished, userEmail }: UseChatSync
       : "Nova Dúvida";
 
     syncChatHistoryWithAPI({
-      chatId: chatIdRef.current,
+      chatId: chatId, 
       email: userEmail,
       topic,
       messages,
       isFinished: isChatFinished,
     });
 
-  }, [messages, isChatFinished, userEmail]);
-
-  return { resetChatId };
+  }, [chatId, messages, isChatFinished, userEmail]);
 }

@@ -12,11 +12,9 @@ export async function fetchStudents(): Promise<Student[]> {
 }
 
 export async function createStudent(data: { name: string; email: string }): Promise<Student> {
-  const response = await fetch("/api/alunos", {
+  const response = await fetch(`${API_URL}/api/alunos`, {
     method: "POST",
-    headers: { 
-      "Content-Type": "application/json" 
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
 
@@ -28,11 +26,9 @@ export async function createStudent(data: { name: string; email: string }): Prom
 }
 
 export async function updateStudentStatus(email: string, visto: boolean) {
-  const response = await fetch("/api/alunos", {
+  const response = await fetch(`${API_URL}/api/alunos`, {
     method: "PATCH",
-    headers: { 
-      "Content-Type": "application/json" 
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, visto }),
   });
 

@@ -12,9 +12,11 @@ interface MessageBubbleProps {
   activeTipIndex?: number;
   rating?: "up" | "down";
   isReadOnly?: boolean;
+  isHistoryView?: boolean;
   onRate?: (rating: "up" | "down") => void;
   onSubmitFeedback?: (text: string) => void; 
   onActionClick?: (value: string) => void;
+  
 }
 
 export function MessageBubble({
@@ -28,7 +30,8 @@ export function MessageBubble({
   onRate,
   onSubmitFeedback, 
   onActionClick,
-  isReadOnly
+  isReadOnly,
+  isHistoryView
 }: MessageBubbleProps) {
   const isAI = role === "ai";
 
@@ -96,7 +99,7 @@ export function MessageBubble({
               rating={rating}
               onRate={onRate}
               onSubmitFeedback={onSubmitFeedback}
-              isReadOnly={isReadOnly}
+              isReadOnly={isHistoryView}
             />
           </div>
         )}

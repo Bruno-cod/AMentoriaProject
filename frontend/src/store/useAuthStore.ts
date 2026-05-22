@@ -4,7 +4,7 @@ import { persist } from "zustand/middleware";
 export type UserRole = "aluno" | "professor";
 
 export interface UserData {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: UserRole;

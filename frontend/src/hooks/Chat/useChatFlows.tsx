@@ -5,21 +5,23 @@ import { generateId } from "@/hooks/Chat/useChatState";
 import { enviarMensagem } from "@/lib/services/chat";
 
 interface ChatContext {
-  alunoId: number;
-  sessaoChatId: number;
+  alunoId: string;
+  sessaoChatId: string;
 }
 
 export const chatFlowService = {
   async processInitialMessage(
     text: string,
     isFirstMessage: boolean,
-    ctx: ChatContext
+    ctx: ChatContext,
+    imageInput?: string | File | null // 🔥 CONSERTADO: Parâmetro adicionado para aceitar a imagem do useChat
   ): Promise<{ message: Message; classification?: ClassificationResult }> {
     let currentClassification: ClassificationResult | undefined;
 
     if (isFirstMessage && text) {
       currentClassification = await classifyMessage(text);
     }
+
 
     const resposta = await enviarMensagem({
       aluno_id: ctx.alunoId,

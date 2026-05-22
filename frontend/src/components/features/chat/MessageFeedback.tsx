@@ -5,7 +5,7 @@ import { ThumbsUp, ThumbsDown, CheckCircle } from "@phosphor-icons/react";
 
 interface MessageFeedbackProps {
   rating?: "up" | "down";
-  isReadOnly?: boolean;
+  isReadOnly?: boolean; 
   onRate?: (rating: "up" | "down") => void;
   onSubmitFeedback?: (text: string) => void;
 }
@@ -21,6 +21,7 @@ export function MessageFeedback({
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleRateDown = () => {
+    if (isReadOnly) return;
     onRate?.("down");
     setIsFeedbackOpen(true);
     setShowSuccess(false);
@@ -28,9 +29,7 @@ export function MessageFeedback({
 
   const submit = () => {
     onSubmitFeedback?.(tempFeedback);
-    
     setShowSuccess(true);
-
     setTimeout(() => {
       setIsFeedbackOpen(false);
       setShowSuccess(false);
@@ -43,44 +42,47 @@ export function MessageFeedback({
       <div className="flex gap-3">
         <button
           onClick={() => {
+            if (isReadOnly) return;
             onRate?.("up");
             setIsFeedbackOpen(false);
             setShowSuccess(false);
           }}
           disabled={isReadOnly}
           className={`text-body-small transition-all ${
-            isReadOnly ? "opacity-50 cursor-not-allowed hover:scale-100" : "cursor-pointer hover:scale-125"
+            isReadOnly ? "cursor-default" : "cursor-pointer hover:scale-125"
           } ${
             rating === "up"
               ? "scale-125 drop-shadow-md text-primaria"
-              : "text-neutras-400 hover:text-neutras-100"
+              : isReadOnly 
+                ? "text-neutras-600 opacity-50" 
+                : "text-neutras-400 hover:text-neutras-100"
           }`}
           title="Resposta útil"
         >
           <ThumbsUp size={16} weight={rating === "up" ? "fill" : "regular"} />
         </button>
+
         <button
           onClick={handleRateDown}
           disabled={isReadOnly}
           className={`text-body-small transition-all ${
-            isReadOnly ? "opacity-50 cursor-not-allowed hover:scale-100" : "cursor-pointer hover:scale-125"
+            isReadOnly ? "cursor-default" : "cursor-pointer hover:scale-125"
           } ${
             rating === "down"
               ? "scale-125 drop-shadow-md text-erro"
-              : "text-neutras-400 hover:text-neutras-100"
+              : isReadOnly 
+                ? "text-neutras-600 opacity-50" 
+                : "text-neutras-400 hover:text-neutras-100"
           }`}
           title="Resposta imprecisa ou confusa"
         >
-          <ThumbsDown
-            size={16}
-            weight={rating === "down" ? "fill" : "regular"}
-          />
+          <ThumbsDown size={16} weight={rating === "down" ? "fill" : "regular"} />
         </button>
       </div>
 
-      {isFeedbackOpen && (
+      
+      {isFeedbackOpen && !isReadOnly && (
         <div className="absolute bottom-full right-0 mb-2 w-64 bg-neutras-800 border border-neutras-700 rounded-xl shadow-2xl p-3 z-50 animate-in zoom-in-95 duration-200">
-          
           {showSuccess ? (
             <div className="flex flex-col items-center justify-center py-4 gap-2 animate-in fade-in duration-300">
               <CheckCircle size={32} weight="fill" className="text-sucesso" />
@@ -116,7 +118,6 @@ export function MessageFeedback({
               </div>
             </>
           )}
-          
         </div>
       )}
     </div>

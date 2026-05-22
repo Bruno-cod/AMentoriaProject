@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 
 from core.database import get_db
-from models.models import Usuario
+# 🔥 ALTERADO: Importando 'User' em vez de 'Usuario'
+from models.models import User
 from schemas.schemas import UserCreate, UserLogin, UserResponse
 
 router = APIRouter()
@@ -13,11 +14,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @router.post("/register", response_model=UserResponse)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(Usuario).filter(Usuario.email == user.email).first()
+    # 🔥 ALTERADO: Consultando na tabela 'User'
+    existing = db.query(User).filter(User.email == user.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Este e-mail já está cadastrado.")
 
-    new_user = Usuario(
+    # 🔥 ALTERADO: Instanciando o modelo 'User'
+    new_user = User(
         nome=user.name,
         email=user.email,
         senha_hash=pwd_context.hash(user.password),
@@ -40,7 +43,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=UserResponse)
 def login(credentials: UserLogin, db: Session = Depends(get_db)):
-    user = db.query(Usuario).filter(Usuario.email == credentials.email).first()
+    user = db.query(User).filter(User.email == credentials.email).first()
 
     if not user or not pwd_context.verify(credentials.password, user.senha_hash):
         raise HTTPException(status_code=401, detail="E-mail ou senha incorretos.")

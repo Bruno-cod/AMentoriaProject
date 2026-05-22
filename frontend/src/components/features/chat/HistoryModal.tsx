@@ -51,14 +51,16 @@ export function HistoryModal({ isOpen, onClose, chatData }: HistoryModalProps) {
 
         <div className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth bg-[radial-gradient(circle_at_top_right,var(--primary-900),transparent_40%)]">
           <div className="max-w-[800px] mx-auto w-full">
-            {chatData.messages.map((msg, index) => (
+            {(chatData.messages || []).map((msg, index) => (
               <div
                 key={msg.id || `msg-history-${index}`}
-                className="pointer-events-none select-text"
+                className="select-text" 
               >
                 <MessageBubble
                   {...msg}
                   activeTipIndex={-1}
+                  isReadOnly={true}      
+                  isHistoryView={true}  
                   onActionClick={() => {}}
                   onRate={() => {}}
                   onSubmitFeedback={() => {}}

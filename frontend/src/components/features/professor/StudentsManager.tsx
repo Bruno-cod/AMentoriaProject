@@ -19,6 +19,7 @@ export function StudentsManager({ searchTerm, mostrarNaoLidos }: StudentsManager
       setIsLoadingAlunos(true);
       try {
         const data = await fetchStudents();
+        console.log("🕵️‍♂️ ALUNOS RECEBIDOS DO BACKEND:", data); 
         setAlunos(data);
       } catch (error) {
         console.error("Erro ao buscar alunos:", error);

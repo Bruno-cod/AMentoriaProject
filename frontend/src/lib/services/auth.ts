@@ -1,12 +1,6 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { UserData, LoginResponse } from "@/types/user";
 
-export interface UserData {
-  id: string;
-  name: string;
-  email: string;
-  role: "aluno" | "professor";
-  subject?: string;
-}
 
 export async function registerUser(data: {
   name: string;
@@ -44,5 +38,19 @@ export async function loginUser(data: {
     throw new Error(err.detail || "E-mail ou senha incorretos.");
   }
 
-  return res.json();
+  const responseData: LoginResponse = await res.json(); 
+
+  console.log("=== RESPOSTA DO LOGIN ===");
+  console.log("responseData completo:", responseData);
+  console.log("access_token:", responseData.access_token);
+  console.log("token:", responseData.token);
+
+  if (typeof window !== "undefined") {
+    const token = responseData.access_token || responseData.token;
+    if (token) {
+      localStorage.setItem("token", token);
+    }
+  }
+
+  return responseData; 
 }

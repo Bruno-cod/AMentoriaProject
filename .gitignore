@@ -1,5 +1,6 @@
 #  Env variables
 .env
+db_password.txt
 
 # Database local
 *.db
@@ -17,3 +18,4 @@ venv/
 
 #  System
 .DS_Store
+

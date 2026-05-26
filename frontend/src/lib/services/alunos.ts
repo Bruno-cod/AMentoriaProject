@@ -1,9 +1,24 @@
 import { Student } from "@/types/student";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+const getAuthHeader = (): Record<string, string> => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("token");
+    if (token) {
+      return { "Authorization": `Bearer ${token}` };
+    }
+  }
+  return {};
+};
+  
   
 export async function fetchStudents(): Promise<Student[]> {
-  
-  const response = await fetch(`${API_URL}/api/alunos`);
+  const response = await fetch(`${API_URL}/api/alunos`, {
+    method: "GET",
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
   
   if (!response.ok) {
     throw new Error("Falha ao carregar a lista de alunos.");
@@ -15,7 +30,10 @@ export async function fetchStudents(): Promise<Student[]> {
 export async function createStudent(data: { name: string; email: string }): Promise<Student> {
   const response = await fetch(`${API_URL}/api/alunos`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      ...getAuthHeader(), 
+    },
     body: JSON.stringify(data),
   });
 
@@ -29,7 +47,10 @@ export async function createStudent(data: { name: string; email: string }): Prom
 export async function updateStudentStatus(email: string, visto: boolean) {
   const response = await fetch(`${API_URL}/api/alunos`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      ...getAuthHeader(),
+    },
     body: JSON.stringify({ email, visto }),
   });
 

@@ -1,4 +1,3 @@
-# routers/alunos.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -7,10 +6,14 @@ from core.database import get_db
 from models.models import Aluno
 from schemas.schemas import AlunoCreateRequest, AlunoStatusUpdateRequest, AlunoResponse
 
+
+from routers.auth import get_current_user
+
 router = APIRouter()
 
 @router.post("", response_model=AlunoResponse)
 def criar_aluno(dados: AlunoCreateRequest, db: Session = Depends(get_db)):
+  
     aluno_existente = db.query(Aluno).filter(Aluno.email == dados.email).first()
     
     if not aluno_existente:
@@ -34,7 +37,12 @@ def criar_aluno(dados: AlunoCreateRequest, db: Session = Depends(get_db)):
     )
 
 @router.patch("")
-def atualizar_status_aluno(dados: AlunoStatusUpdateRequest, db: Session = Depends(get_db)):
+def atualizar_status_aluno(
+    dados: AlunoStatusUpdateRequest, 
+    db: Session = Depends(get_db),
+    
+    professor_logado: Aluno = Depends(get_current_user)
+):
     aluno = db.query(Aluno).filter(Aluno.email == dados.email).first()
     
     if not aluno:
@@ -46,7 +54,11 @@ def atualizar_status_aluno(dados: AlunoStatusUpdateRequest, db: Session = Depend
     return {"status": "Status atualizado com sucesso!", "visto": aluno.visto}
 
 @router.get("", response_model=List[AlunoResponse])
-def listar_todos_alunos(db: Session = Depends(get_db)):
+def listar_todos_alunos(
+    db: Session = Depends(get_db),
+   
+    professor_logado: Aluno = Depends(get_current_user)
+):
     alunos_db = db.query(Aluno).all()
     
 

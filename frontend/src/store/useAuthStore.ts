@@ -1,15 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-export type UserRole = "aluno" | "professor";
-
-export interface UserData {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  subject?: string;
-}
+import { UserData } from "@/types/user";
 
 interface AuthState {
   user: UserData | null;
@@ -29,6 +20,9 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+        }
         set({ user: null, isLogged: false });
       },
     }),

@@ -3,10 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
-import { Button } from "@/components/ui/Button"; 
+import { Button } from "@/components/ui/Button";
 import { HistoryModal } from "@/components/features/chat/HistoryModal";
 import { ChatHistoryData } from "@/types/chat";
-import { UploadSimple, FileText, Plus, SignOut, List, X, ChatTeardrop } from "@phosphor-icons/react";
+import {
+  UploadSimple,
+  FileText,
+  Plus,
+  SignOut,
+  List,
+  X,
+  ChatTeardrop,
+} from "@phosphor-icons/react";
 import { KnowledgeFile } from "@/types/files";
 import { fetchKnowledgeFiles } from "@/lib/services/files";
 import { fetchStudentHistory } from "@/lib/services/historico";
@@ -19,22 +27,28 @@ interface SidebarProps {
   mobileActionBarSlot?: React.ReactNode;
 }
 
-
-export const Sidebar = ({  onClose, onUploadClick, onManageFilesClick, mobileActionBarSlot }: SidebarProps) => {
+export const Sidebar = ({
+  onClose,
+  onUploadClick,
+  onManageFilesClick,
+  mobileActionBarSlot,
+}: SidebarProps) => {
   const [history, setHistory] = useState<ChatHistoryData[]>([]);
   const [recentFiles, setRecentFiles] = useState<KnowledgeFile[]>([]);
   const [isMounted, setIsMounted] = useState(false);
-  
-  const [isExpanded, setIsExpanded] = useState(true); 
+
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedChat, setSelectedChat] = useState<ChatHistoryData | null>(null);
+  const [selectedChat, setSelectedChat] = useState<ChatHistoryData | null>(
+    null,
+  );
 
   const { user, logout } = useAuthStore();
   const router = useRouter();
 
   const loadHistory = async () => {
-    if (!user?.email) return; 
+    if (!user?.email) return;
 
     try {
       const data = await fetchStudentHistory(user.email);
@@ -55,15 +69,17 @@ export const Sidebar = ({  onClose, onUploadClick, onManageFilesClick, mobileAct
 
   useEffect(() => {
     setIsMounted(true);
+    if (!user?.email) return;
+
     loadHistory();
-    
+
     if (user?.role === "professor") {
       loadRecentFiles();
     }
 
     const handleResize = () => {
       if (window.innerWidth < 768) {
-        setIsExpanded(false); 
+        setIsExpanded(false);
       } else {
         setIsExpanded(true);
       }
@@ -96,29 +112,31 @@ export const Sidebar = ({  onClose, onUploadClick, onManageFilesClick, mobileAct
       if (onClose) {
         onClose();
       } else {
-        setIsExpanded(!isExpanded); 
+        setIsExpanded(!isExpanded);
       }
     } else {
-      setIsExpanded(!isExpanded); 
+      setIsExpanded(!isExpanded);
     }
   };
 
   return (
     <>
-      
-      <aside className={`h-screen bg-neutras-900 border-r border-neutras-800 flex flex-col p-6 z-20 transition-all duration-300 ease-in-out ${isExpanded ? 'w-[325px]' : 'w-[88px] items-center'}`}>
-        
-        <div className={`flex items-center mb-6 w-full ${isExpanded ? 'justify-between' : 'justify-center'}`}>
+      <aside
+        className={`h-screen bg-neutras-900 border-r border-neutras-800 flex flex-col p-6 z-20 transition-all duration-300 ease-in-out ${isExpanded ? "w-[325px]" : "w-[88px] items-center"}`}
+      >
+        <div
+          className={`flex items-center mb-6 w-full ${isExpanded ? "justify-between" : "justify-center"}`}
+        >
           {isExpanded && (
             <span className="text-neutras-50 font-bold whitespace-nowrap hidden md:block">
               Menu Principal
             </span>
           )}
-          
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={toggleSidebar} 
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
             className="text-neutras-50 hover:bg-neutras-800 shrink-0"
           >
             {isExpanded ? (
@@ -135,7 +153,7 @@ export const Sidebar = ({  onClose, onUploadClick, onManageFilesClick, mobileAct
               <Button
                 variant="ghost"
                 onClick={onUploadClick}
-                className={`w-full !rounded-xl bg-primaria/10 !text-primaria hover:bg-primaria/20 border border-primaria/20 font-semibold flex items-center gap-3 transition-all cursor-pointer ${isExpanded ? '!px-4 !py-3 justify-center !text-sm' : '!p-3 justify-center'}`}
+                className={`w-full !rounded-xl bg-primaria/10 !text-primaria hover:bg-primaria/20 border border-primaria/20 font-semibold flex items-center gap-3 transition-all cursor-pointer ${isExpanded ? "!px-4 !py-3 justify-center !text-sm" : "!p-3 justify-center"}`}
                 title={!isExpanded ? "Novo upload" : ""}
               >
                 <UploadSimple size={20} weight="bold" className="shrink-0" />
@@ -143,10 +161,10 @@ export const Sidebar = ({  onClose, onUploadClick, onManageFilesClick, mobileAct
               </Button>
 
               {mobileActionBarSlot && (
-              <div className="block md:hidden w-full mb-6 border-b border-neutras-800 pb-6">
-                {isExpanded && mobileActionBarSlot}
-              </div>
-            )}
+                <div className="block md:hidden w-full mb-6 border-b border-neutras-800 pb-6">
+                  {isExpanded && mobileActionBarSlot}
+                </div>
+              )}
             </div>
 
             <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 w-full">
@@ -157,32 +175,38 @@ export const Sidebar = ({  onClose, onUploadClick, onManageFilesClick, mobileAct
               )}
 
               <nav className="flex flex-col gap-2 w-full">
-                {recentFiles.length === 0 ? (
-                  isExpanded && <span className="text-neutras-500 text-xs px-2 italic">Nenhum arquivo recente.</span>
-                ) : (
-                  recentFiles.map((file) => (
-                    <div
-                      key={file.id}
-                      onClick={onManageFilesClick}
-                      className={`group flex flex-col rounded-2xl hover:bg-neutras-800 transition-colors cursor-pointer border border-transparent hover:border-neutras-700 ${isExpanded ? 'p-3' : 'p-3 items-center'}`}
-                      title={file.name}
-                    >
-                      <div className="flex items-center gap-2">
-                        <FileText size={isExpanded ? 16 : 20} className="text-neutras-400 shrink-0" weight="fill" />
+                {recentFiles.length === 0
+                  ? isExpanded && (
+                      <span className="text-neutras-500 text-xs px-2 italic">
+                        Nenhum arquivo recente.
+                      </span>
+                    )
+                  : recentFiles.map((file) => (
+                      <div
+                        key={file.id}
+                        onClick={onManageFilesClick}
+                        className={`group flex flex-col rounded-2xl hover:bg-neutras-800 transition-colors cursor-pointer border border-transparent hover:border-neutras-700 ${isExpanded ? "p-3" : "p-3 items-center"}`}
+                        title={file.name}
+                      >
+                        <div className="flex items-center gap-2">
+                          <FileText
+                            size={isExpanded ? 16 : 20}
+                            className="text-neutras-400 shrink-0"
+                            weight="fill"
+                          />
+                          {isExpanded && (
+                            <span className="text-neutras-50 text-sm font-medium truncate">
+                              {file.name}
+                            </span>
+                          )}
+                        </div>
                         {isExpanded && (
-                          <span className="text-neutras-50 text-sm font-medium truncate">
-                            {file.name}
+                          <span className="text-neutras-500 text-[10px] ml-6 mt-1">
+                            {formatShortDate(file.uploadDate)}
                           </span>
                         )}
                       </div>
-                      {isExpanded && (
-                        <span className="text-neutras-500 text-[10px] ml-6 mt-1">
-                          {formatShortDate(file.uploadDate)}
-                        </span>
-                      )}
-                    </div>
-                  ))
-                )}
+                    ))}
               </nav>
             </div>
           </>
@@ -191,7 +215,7 @@ export const Sidebar = ({  onClose, onUploadClick, onManageFilesClick, mobileAct
             <Button
               variant="ghost"
               onClick={handleNewChat}
-              className={`w-full !rounded-2xl border border-primaria/50 !text-neutras-50 font-medium flex items-center gap-2 hover:bg-primaria/10 transition-all mb-8 group cursor-pointer ${isExpanded ? '!py-3 !px-4 justify-center !text-base' : '!p-3 justify-center'}`}
+              className={`w-full !rounded-2xl border border-primaria/50 !text-neutras-50 font-medium flex items-center gap-2 hover:bg-primaria/10 transition-all mb-8 group cursor-pointer ${isExpanded ? "!py-3 !px-4 justify-center !text-base" : "!p-3 justify-center"}`}
               title={!isExpanded ? "Nova dúvida" : ""}
             >
               <span className="group-hover:rotate-90 transition-transform flex items-center justify-center shrink-0">
@@ -208,40 +232,53 @@ export const Sidebar = ({  onClose, onUploadClick, onManageFilesClick, mobileAct
               )}
 
               <nav className="flex flex-col gap-2 w-full">
-                {history.length === 0 ? (
-                  isExpanded && <span className="text-neutras-500 text-xs px-2 italic">Nenhuma dúvida recente.</span>
-                ) : (
-                  history.map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => handleOpenHistory(item)} 
-                      className={`group flex flex-col rounded-2xl hover:bg-neutras-800 transition-colors cursor-pointer border border-transparent hover:border-neutras-700 ${isExpanded ? 'p-3' : 'p-3 items-center'}`}
-                      title={item.topic}
-                    >
-                      <div className="flex items-center gap-2">
-                        {!isExpanded && <ChatTeardrop size={20} className="text-neutras-400 shrink-0" weight="fill" />}
+                {history.length === 0
+                  ? isExpanded && (
+                      <span className="text-neutras-500 text-xs px-2 italic">
+                        Nenhuma dúvida recente.
+                      </span>
+                    )
+                  : history.map((item) => (
+                      <div
+                        key={item.id}
+                        onClick={() => handleOpenHistory(item)}
+                        className={`group flex flex-col rounded-2xl hover:bg-neutras-800 transition-colors cursor-pointer border border-transparent hover:border-neutras-700 ${isExpanded ? "p-3" : "p-3 items-center"}`}
+                        title={item.topic}
+                      >
+                        <div className="flex items-center gap-2">
+                          {!isExpanded && (
+                            <ChatTeardrop
+                              size={20}
+                              className="text-neutras-400 shrink-0"
+                              weight="fill"
+                            />
+                          )}
+                          {isExpanded && (
+                            <span className="text-neutras-50 text-sm font-medium truncate">
+                              {item.topic}
+                            </span>
+                          )}
+                        </div>
                         {isExpanded && (
-                          <span className="text-neutras-50 text-sm font-medium truncate">
-                            {item.topic}
+                          <span className="text-neutras-500 text-[10px] mt-1">
+                            {formatShortDate(item.date)}
                           </span>
                         )}
                       </div>
-                      {isExpanded && (
-                        <span className="text-neutras-500 text-[10px] mt-1">
-                          {formatShortDate(item.date)}
-                        </span>
-                      )}
-                    </div>
-                  ))
-                )}
+                    ))}
               </nav>
             </div>
           </>
         )}
 
-        <div className={`w-full mt-6 pt-6 border-t border-neutras-800 flex ${isExpanded ? 'items-center justify-between' : 'flex-col items-center gap-4'}`}>
+        <div
+          className={`w-full mt-6 pt-6 border-t border-neutras-800 flex ${isExpanded ? "items-center justify-between" : "flex-col items-center gap-4"}`}
+        >
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 shrink-0 rounded-full bg-[linear-gradient(176deg,var(--primary-600),var(--secondary-400))] flex items-center justify-center text-neutras-50 font-bold uppercase cursor-pointer" title={user?.name}>
+            <div
+              className="w-10 h-10 shrink-0 rounded-full bg-[linear-gradient(176deg,var(--primary-600),var(--secondary-400))] flex items-center justify-center text-neutras-50 font-bold uppercase cursor-pointer"
+              title={user?.name}
+            >
               {isMounted ? user?.name?.charAt(0) || "V" : ""}
             </div>
 
@@ -252,7 +289,9 @@ export const Sidebar = ({  onClose, onUploadClick, onManageFilesClick, mobileAct
                 </span>
                 <span className="text-sucesso text-xs flex items-center gap-1">
                   <span className="w-1.5 h-1.5 bg-sucesso rounded-full animate-pulse" />
-                  {isMounted && user?.role === "professor" ? "Monitor" : "Online"}
+                  {isMounted && user?.role === "professor"
+                    ? "Monitor"
+                    : "Online"}
                 </span>
               </div>
             )}
@@ -260,8 +299,8 @@ export const Sidebar = ({  onClose, onUploadClick, onManageFilesClick, mobileAct
 
           {isMounted && user && (
             <Button
-              variant={'ghost'}
-              size={'icon'}
+              variant={"ghost"}
+              size={"icon"}
               onClick={handleLogout}
               title="Sair da conta"
               className="text-neutras-400 hover:text-neutras-50"
@@ -272,10 +311,10 @@ export const Sidebar = ({  onClose, onUploadClick, onManageFilesClick, mobileAct
         </div>
       </aside>
 
-      <HistoryModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        chatData={selectedChat} 
+      <HistoryModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        chatData={selectedChat}
       />
     </>
   );

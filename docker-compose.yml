@@ -4,7 +4,7 @@ services:
     container_name: amentoria-postgres
     environment:
       POSTGRES_USER: amentoria_user
-      POSTGRES_PASSWORD: amentoria_pass
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} 
       POSTGRES_DB: amentoria
     ports:
       - "5433:5432"

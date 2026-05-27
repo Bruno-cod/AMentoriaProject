@@ -21,7 +21,7 @@ export function AlertManager({ searchTerm }: AlertManagerProps) {
         const data = await fetchAllHistory();
 
         const flattenedAlerts: AlertItem[] = data.flatMap((chat) =>
-          chat.messages
+          (chat.messages || [])
             .filter((msg) => msg.rating === "down")
             .map((msg) => ({
               chatId: chat.id,

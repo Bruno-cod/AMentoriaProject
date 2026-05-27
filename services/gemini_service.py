@@ -2,6 +2,8 @@ import os
 from typing import List
 
 from openai import OpenAI
+from dotenv import load_dotenv
+load_dotenv()
 
 SYSTEM_PROMPT = """Você é um tutor socrático especializado em ENEM.
 Seu objetivo NÃO é dar a resposta direta, mas guiar o aluno a raciocinar até chegar nela.

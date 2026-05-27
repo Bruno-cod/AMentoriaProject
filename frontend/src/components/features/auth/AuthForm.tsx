@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { registerUser, loginUser } from "@/lib/services/auth";
-
+import { createStudent } from "@/lib/services/alunos";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/Form";
 import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button"; 
+import { Button } from "@/components/ui/Button";
 
 import { authSchema, type AuthFormValues } from "@/lib/validations/auth";
 
@@ -47,25 +47,52 @@ export default function AuthForm() {
 
     try {
       if (values.isCreatingAccount) {
-        const userData = await registerUser({
+        const response = await registerUser({
           name: values.name || "",
           email: values.email,
           password: values.password,
           role: values.role,
           subject: values.role === "professor" ? values.subject : undefined,
         });
+
+        const { access_token, token, ...userData } = response as any;
+        const tokenReal = access_token || token;
+
+        if (tokenReal) {
+          localStorage.setItem("token", tokenReal);
+        }
+
+        if (values.role === "aluno") {
+          try {
+            await createStudent({
+              name: values.name || "",
+              email: values.email,
+            });
+          } catch (studentErr) {
+            console.error(
+              "Aviso: Falha ao sincronizar tabela de alunos:",
+              studentErr,
+            );
+          }
+        }
+
         setUser(userData);
         router.push(userData.role === "aluno" ? "/Aluno" : "/Professor");
       } else {
-        const userData = await loginUser({
+        const response = await loginUser({
           email: values.email,
           password: values.password,
         });
+
+        const { access_token, token, ...userData } = response as any;
+
         setUser(userData);
         router.push(userData.role === "aluno" ? "/Aluno" : "/Professor");
       }
     } catch (err) {
-      setApiError(err instanceof Error ? err.message : "Erro ao conectar com o servidor.");
+      setApiError(
+        err instanceof Error ? err.message : "Erro ao conectar com o servidor.",
+      );
     }
   };
 

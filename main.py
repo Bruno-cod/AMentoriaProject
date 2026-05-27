@@ -1,7 +1,7 @@
 # main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import chat, auth
+from routers import chat, auth, alunos, files
 from core.database import engine
 from models import models
 
@@ -19,6 +19,8 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Autenticação"])
 app.include_router(chat.router, prefix="/api/chat", tags=["Tutoria e Chat"])
+app.include_router(alunos.router, prefix="/api/alunos", tags=["Gestão de Alunos"])
+app.include_router(files.router, prefix="/api/files", tags=["Arquivos de Conhecimento"])
 
 
 @app.get("/")

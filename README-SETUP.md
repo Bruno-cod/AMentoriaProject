@@ -282,6 +282,40 @@ kill -9 <PID>
 1. Make sure `(venv)` is visible in the terminal
 2. Run: `pip install -r requirements.txt`
 
+### PostgreSQL — Password authentication failed
+
+If the backend fails to start with an error similar to:
+
+```bash
+password authentication failed for user "amentoria_user"
+```
+
+this usually means the PostgreSQL Docker volume was previously created using different credentials than the current `.env` file.
+
+This may happen after:
+
+- regenerating the `.env`
+- cloning the project again
+- changing `POSTGRES_PASSWORD`
+- changing `DATABASE_URL`
+
+### Solution
+
+Reset the PostgreSQL containers and volumes:
+
+```bash
+docker compose down -v
+docker compose up -d
+```
+
+> ⚠️ This removes local database data and recreates the PostgreSQL container using the credentials currently defined in `.env`.
+
+After that, restart the backend:
+
+```bash
+uvicorn main:app --reload
+```
+
 ---
 
 ## 📝 Important Notes

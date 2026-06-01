@@ -14,8 +14,10 @@ import { useChatStore } from "@/store/useChatStore";
 import { Navbar } from "@/components/layout/Navbar";
 import { ThinkingIndicator } from "@/components/features/chat/ThinkingIndicator";
 import { ChatFinishedControls } from "@/components/features/chat/ChatFinishedControls";
+import { useAuth } from "@/hooks/Auth/useAuth";
 
 export default function ChatPage() {
+  const { user } = useAuth();
   const router = useRouter();
 
   const {
@@ -100,6 +102,14 @@ export default function ChatPage() {
     clearChat?.();
     router.push("/Aluno");
   };
+
+  if (!user) {
+    return (
+      <div className="flex h-screen bg-neutras-900 items-center justify-center">
+        <span className="text-neutras-50 animate-pulse">Carregando ambiente seguro...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-neutras-900 overflow-hidden font-poppins text-neutras-50">

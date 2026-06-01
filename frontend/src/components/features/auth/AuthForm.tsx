@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { registerUser, loginUser } from "@/lib/services/auth";
 import { createStudent } from "@/lib/services/alunos";
@@ -20,11 +20,20 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
 import { authSchema, type AuthFormValues } from "@/lib/validations/auth";
+import { useAuth } from "@/hooks/Auth/useAuth"
 
 export default function AuthForm() {
   const router = useRouter();
   const { setUser } = useAuthStore();
+   const {user} = useAuth();
+
   const [apiError, setApiError] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      router.push(user.role === "aluno" ? "/Aluno" : "/Professor");
+    }
+  }, [user, router]);
 
   const form = useForm<AuthFormValues>({
     resolver: zodResolver(authSchema),
@@ -85,6 +94,11 @@ export default function AuthForm() {
         });
 
         const { access_token, token, ...userData } = response as any;
+        const tokenReal = access_token || token;
+
+        if (tokenReal) {
+          localStorage.setItem("token", tokenReal);
+        }
 
         setUser(userData);
         router.push(userData.role === "aluno" ? "/Aluno" : "/Professor");

@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 from core.database import get_db
 from models.models import User
-from schemas.schemas import UserCreate, UserLogin, UserResponse
+from schemas.schemas import UserCreate, UserLogin
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

@@ -40,10 +40,6 @@ export async function loginUser(data: {
 
   const responseData: LoginResponse = await res.json(); 
 
-  console.log("=== RESPOSTA DO LOGIN ===");
-  console.log("responseData completo:", responseData);
-  console.log("access_token:", responseData.access_token);
-  console.log("token:", responseData.token);
 
   if (typeof window !== "undefined") {
     const token = responseData.access_token || responseData.token;

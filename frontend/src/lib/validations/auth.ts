@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+export const getAuthHeader = () : Record<string, string> => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("token");
+    return token ? { "Authorization": `Bearer ${token}` } : {};
+  }
+  return {};
+};
+
 export const authSchema = z.object({
   isCreatingAccount: z.boolean(),
   role: z.enum(["aluno", "professor"]),

@@ -19,6 +19,7 @@ import { KnowledgeFile } from "@/types/files";
 import { fetchKnowledgeFiles } from "@/lib/services/files";
 import { fetchStudentHistory } from "@/lib/services/historico";
 import { formatShortDate } from "@/lib/formatters";
+import { useAuth } from "@/hooks/Auth/useAuth";
 
 interface SidebarProps {
   onClose?: () => void;
@@ -44,7 +45,10 @@ export const Sidebar = ({
     null,
   );
 
-  const { user, logout } = useAuthStore();
+  const {logout } = useAuthStore();
+
+  const { user } = useAuth();
+
   const router = useRouter();
 
   const loadHistory = async () => {

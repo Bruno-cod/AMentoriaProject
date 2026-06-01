@@ -1,5 +1,6 @@
 import { Message } from "@/types/chat";
 import { ChatHistoryData } from "@/types/chat";
+import { getAuthHeader } from "../validations/auth";
 
 interface SyncChatParams {
   chatId: string;
@@ -10,14 +11,6 @@ interface SyncChatParams {
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-const getAuthHeader = () : Record<string, string> => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("token");
-    return token ? { "Authorization": `Bearer ${token}` } : {};
-  }
-  return {};
-};
 
 export async function fetchAllHistory(): Promise<ChatHistoryData[]> {
   const response = await fetch(`${API_URL}/api/chat/historico`, {
@@ -34,8 +27,7 @@ export async function fetchAllHistory(): Promise<ChatHistoryData[]> {
 export async function fetchStudentHistory(email: string): Promise<ChatHistoryData[]> {
   const safeEmail = encodeURIComponent(email);
   
-  console.log("=== DEBUG HISTÓRICO ===");
-  console.log("Chave 'token' no localStorage:", localStorage.getItem("token"));
+
   
   const headers = getAuthHeader();
   console.log("Headers gerados para a requisição:", headers);

@@ -1,7 +1,8 @@
 "use client";
 
 import { MessageFeedback } from "./MessageFeedback";
-import ReactMarkdown from "react-markdown"; 
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface MessageBubbleProps {
   role: "user" | "ai";
@@ -14,10 +15,120 @@ interface MessageBubbleProps {
   isReadOnly?: boolean;
   isHistoryView?: boolean;
   onRate?: (rating: "up" | "down") => void;
-  onSubmitFeedback?: (text: string) => void; 
+  onSubmitFeedback?: (text: string) => void;
   onActionClick?: (value: string) => void;
-  
 }
+
+const EducationalMarkdown = ({ content }: { content: string }) => {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        
+        h3: ({ children }) => (
+          <h3 className="text-base font-bold text-primaria mt-5 mb-2 flex items-center gap-2">
+            {children}
+          </h3>
+        ),
+        h4: ({ children }) => (
+          <h4 className="text-sm font-bold text-secundaria mt-4 mb-2">
+            {children}
+          </h4>
+        ),
+        h2: ({ children }) => (
+          <h2 className="text-lg font-extrabold text-primaria mt-6 mb-4 border-b border-neutras-600 pb-2">
+            {children}
+          </h2>
+        ),
+        
+        table: ({ children }) => (
+          <div className="overflow-x-auto my-5">
+            <table className="min-w-full border-collapse border border-neutras-600 text-sm">
+              {children}
+            </table>
+          </div>
+        ),
+        th: ({ children }) => (
+          <th className="border border-neutras-600 bg-neutras-700/50 px-3 py-2 font-bold text-primaria text-left">
+            {children}
+          </th>
+        ),
+        td: ({ children }) => (
+          <td className="border border-neutras-600 px-3 py-2 text-neutras-100">
+            {children}
+          </td>
+        ),
+        
+        a: ({ children, href }) => (
+          <a href={href} target="_blank" rel="noopener noreferrer" className="text-secundaria underline hover:text-primaria transition-colors">
+            {children}
+          </a>
+        ),
+        
+      
+        p: ({ children }) => (
+          <p className="mt-3 mb-3 leading-relaxed text-neutras-100">
+            {children}
+          </p>
+        ),
+        
+       
+        ul: ({ children }) => (
+          <ul className="mt-3 mb-4 ml-5 space-y-2 list-disc">
+            {children}
+          </ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="mt-3 mb-4 ml-5 space-y-2 list-decimal">
+            {children}
+          </ol>
+        ),
+        li: ({ children }) => (
+          <li className="text-neutras-100 pl-1">
+            {children}
+          </li>
+        ),
+        
+        strong: ({ children }) => (
+          <strong className="font-bold text-primaria">
+            {children}
+          </strong>
+        ),
+        
+        em: ({ children }) => (
+          <em className="italic text-secundaria">
+            {children}
+          </em>
+        ),
+       
+        blockquote: ({ children }) => (
+          <blockquote className="my-4 pl-4 py-3 border-l-4 border-primaria bg-primaria/5 rounded text-neutras-100 italic">
+            {children}
+          </blockquote>
+        ),
+        hr: () => (
+          <hr className="my-5 border-neutras-600" />
+        ),
+       
+        code: ({ children, className }) => {
+          const isCodeBlock = className?.includes('language-');
+          
+          return isCodeBlock ? (
+            <code className="block bg-neutras-700 text-neutras-100 p-4 rounded-lg overflow-x-auto text-sm font-mono my-4">
+              {children}
+            </code>
+          ) : (
+            <code className="bg-neutras-700 text-secundaria px-2 py-0.5 rounded text-sm font-mono mx-1">
+              {children}
+            </code>
+          );
+        }
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
+};
 
 export function MessageBubble({
   role,
@@ -28,10 +139,10 @@ export function MessageBubble({
   activeTipIndex,
   rating,
   onRate,
-  onSubmitFeedback, 
+  onSubmitFeedback,
   onActionClick,
   isReadOnly,
-  isHistoryView
+  isHistoryView,
 }: MessageBubbleProps) {
   const isAI = role === "ai";
 
@@ -42,7 +153,9 @@ export function MessageBubble({
 
   return (
     <div
-      className={`flex w-full mb-6 animate-in fade-in slide-in-from-bottom-3 duration-300 ${isAI ? "justify-start" : "justify-end"}`}
+      className={`flex w-full mb-6 animate-in fade-in slide-in-from-bottom-3 duration-300 ${
+        isAI ? "justify-start" : "justify-end"
+      }`}
     >
       <div className="flex flex-col max-w-[75%] gap-2">
         <div
@@ -62,11 +175,13 @@ export function MessageBubble({
             </div>
           )}
 
-          {content && (
-            <div className="text-[15px] leading-relaxed font-medium tracking-tight prose prose-invert max-w-none [&>p]:mb-2 last:[&>p]:mb-0 [&>strong]:font-bold">
-              <ReactMarkdown>
-                {content}
-                </ReactMarkdown>
+          {content && isAI ? (
+            <div className="text-[15px] leading-relaxed tracking-tight max-w-none">
+              <EducationalMarkdown content={content} />
+            </div>
+          ) : (
+            <div className="text-[15px] leading-relaxed font-medium tracking-tight">
+              {content}
             </div>
           )}
         </div>
@@ -87,15 +202,18 @@ export function MessageBubble({
         )}
 
         {isAI && (
-          <div className={`flex items-center px-2 mt-1 ${tipLevel ? "justify-between" : "justify-end"}`}>
+          <div
+            className={`flex items-center px-2 mt-1 ${
+              tipLevel ? "justify-between" : "justify-end"
+            }`}
+          >
             {tipLevel && (
               <span className="text-[10px] font-bold text-primaria uppercase tracking-widest">
                 Dica #{tipLevel}
               </span>
             )}
 
-            
-            <MessageFeedback 
+            <MessageFeedback
               rating={rating}
               onRate={onRate}
               onSubmitFeedback={onSubmitFeedback}

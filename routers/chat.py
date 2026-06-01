@@ -21,6 +21,7 @@ class ChatMessage(BaseModel):
     aluno_id: str
     sessao_chat_id: str
     texto_duvida: str
+    imagem_base64: Optional[str] = None
 
 class SyncHistoryRequest(BaseModel):
     chatId: str
@@ -32,10 +33,7 @@ class SyncHistoryRequest(BaseModel):
 
 @router.post("/enviar")
 async def enviar_duvida(mensagem: ChatMessage, db: Session = Depends(get_db)):
-    """
-    [MECANISMO DE CONCORRÊNCIA APLICADO]: Rota assíncrona (async def) que despacha
-    a chamada síncrona/bloqueante da IA do Gemini para um Pool de Threads dedicado (run_in_threadpool).
-    """
+    
     crud.salvar_mensagem(
         db=db,
         aluno_id=mensagem.aluno_id,
@@ -51,7 +49,8 @@ async def enviar_duvida(mensagem: ChatMessage, db: Session = Depends(get_db)):
     texto_resposta_ia = await run_in_threadpool(
         ai_service.gerar_resposta,
         pergunta_aluno=mensagem.texto_duvida, 
-        historico=historico_formatated
+        historico=historico_formatated,
+        imagem_base64=mensagem.imagem_base64
     )
 
     crud.salvar_mensagem(

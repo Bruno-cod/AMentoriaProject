@@ -4,6 +4,7 @@ interface ChatRequest {
   aluno_id: string;
   sessao_chat_id: string;
   texto_duvida: string;
+  imagem_base64?: string | null;
 }
 
 export interface ChatResponse {

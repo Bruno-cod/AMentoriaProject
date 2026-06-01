@@ -51,22 +51,36 @@ export function HistoryModal({ isOpen, onClose, chatData }: HistoryModalProps) {
 
         <div className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth bg-[radial-gradient(circle_at_top_right,var(--primary-900),transparent_40%)]">
           <div className="max-w-[800px] mx-auto w-full">
-            {(chatData.messages || []).map((msg, index) => (
-              <div
-                key={msg.id || `msg-history-${index}`}
-                className="select-text" 
-              >
-                <MessageBubble
-                  {...msg}
-                  activeTipIndex={-1}
-                  isReadOnly={true}      
-                  isHistoryView={true}  
-                  onActionClick={() => {}}
-                  onRate={() => {}}
-                  onSubmitFeedback={() => {}}
-                />
-              </div>
-            ))}
+            {(chatData.messages || []).map((msg: any, index) => {
+              
+              // 1. Mapeia a imagem não importa o nome que venha do backend
+              const rawImage = msg.image || msg.imagem || msg.imagem_base64 || msg.imageUrl;
+              
+              // 2. Garante que se for base64 puro, tenha o prefixo correto para o HTML
+              const formattedImage = rawImage && !rawImage.startsWith('http') && !rawImage.startsWith('data:image')
+                ? `data:image/jpeg;base64,${rawImage}`
+                : rawImage;
+
+              return (
+                <div
+                  key={msg.id || `msg-history-${index}`}
+                  className="select-text" 
+                >
+                  <MessageBubble
+                    {...msg} 
+                    role={msg.role === "aluno" ? "user" : msg.role === "ia" ? "ai" : msg.role} 
+                    content={msg.content || ""} 
+                    image={formattedImage} 
+                    activeTipIndex={-1}
+                    isReadOnly={true}      
+                    isHistoryView={true}  
+                    onActionClick={() => {}}
+                    onRate={() => {}}
+                    onSubmitFeedback={() => {}}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
 

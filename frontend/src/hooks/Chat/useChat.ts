@@ -6,6 +6,7 @@ import { ClassificationResult } from "@/types/enem";
 import { useChatState, generateId } from "@/hooks/Chat/useChatState";
 import { useChatSync } from "@/hooks/Chat/useChatSync";
 import { chatFlowService } from "@/hooks/Chat/useChatFlows";
+import { fileToBase64 } from "@/lib/imageFormatter";
 
 export function useChat() {
   const { user } = useAuthStore();
@@ -102,16 +103,38 @@ export function useChat() {
   }, [tipCount, classification, addMessage, setIsAiThinking, setTipCount, getChatContext]);
 
   const sendMessage = useCallback(async (text: string, imageInput?: string | File | null) => {
-    let imageUrl: string | null | undefined = null;
+    let imageBase64: string | null = null;
 
+  
     if (imageInput instanceof File) {
-      imageUrl = URL.createObjectURL(imageInput);
+      try {
+        imageBase64 = await fileToBase64(imageInput); 
+      } catch (err) {
+        console.error("Erro ao converter imagem para base64:", err);
+      }
     } else if (typeof imageInput === "string") {
-      imageUrl = imageInput;
+      if (imageInput.startsWith("blob:")) {
+        try {
+          const response = await fetch(imageInput);
+          const blob = await response.blob();
+          
+          imageBase64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = (error) => reject(error);
+          });
+        } catch (err) {
+          console.error("Erro ao converter blob url para base64:", err);
+        }
+      } else {
+        imageBase64 = imageInput; 
+      }
     }
 
     const userMsgId = generateId("u");
-    addMessage({ id: userMsgId, role: "user", content: text || "", image: imageUrl });
+    
+    addMessage({ id: userMsgId, role: "user", content: text || "", image: imageBase64 });
     setIsAiThinking(true);
 
     if (lastProcessedUserMsgId.current === userMsgId) return;
@@ -122,7 +145,8 @@ export function useChat() {
       const { message, classification: newClassification } = await chatFlowService.processInitialMessage(
         text,
         isFirstMessage,
-        getChatContext()
+        getChatContext(),
+        imageBase64 // IA analisa o base64
       );
 
       if (newClassification) setClassification(newClassification);

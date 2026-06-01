@@ -1,15 +1,8 @@
 import { Student } from "@/types/student";
+import { getAuthHeader } from "../validations/auth";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-const getAuthHeader = (): Record<string, string> => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("token");
-    if (token) {
-      return { "Authorization": `Bearer ${token}` };
-    }
-  }
-  return {};
-};
+
   
   
 export async function fetchStudents(): Promise<Student[]> {

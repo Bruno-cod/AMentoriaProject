@@ -10,6 +10,34 @@ interface StudentsManagerProps {
   mostrarNaoLidos: boolean;
 }
 
+// Skeleton de linha da tabela
+const SkeletonRow = () => (
+  <div className="flex items-center gap-4 px-4 py-3 border-b border-neutras-800 animate-pulse">
+    <div className="w-8 h-8 bg-neutras-700 rounded-full shrink-0" />
+    <div className="flex-1 flex flex-col gap-1.5">
+      <div className="h-3.5 bg-neutras-700 rounded-full w-1/3" />
+      <div className="h-2.5 bg-neutras-800 rounded-full w-1/2" />
+    </div>
+    <div className="h-6 w-16 bg-neutras-700 rounded-full" />
+    <div className="h-6 w-20 bg-neutras-800 rounded-full" />
+  </div>
+);
+
+const SkeletonTable = () => (
+  <div className="flex flex-col rounded-2xl border border-neutras-800 overflow-hidden">
+    {/* Header skeleton */}
+    <div className="flex items-center gap-4 px-4 py-3 bg-neutras-800/50 border-b border-neutras-700">
+      <div className="h-3 bg-neutras-700 rounded-full w-24" />
+      <div className="h-3 bg-neutras-700 rounded-full w-16 ml-auto" />
+      <div className="h-3 bg-neutras-700 rounded-full w-20" />
+    </div>
+    {/* Rows skeleton */}
+    {[1, 2, 3, 4, 5].map((i) => (
+      <SkeletonRow key={i} />
+    ))}
+  </div>
+);
+
 export function StudentsManager({ searchTerm, mostrarNaoLidos }: StudentsManagerProps) {
   const [alunos, setAlunos] = useState<Student[]>([]);
   const [isLoadingAlunos, setIsLoadingAlunos] = useState(true);
@@ -19,7 +47,6 @@ export function StudentsManager({ searchTerm, mostrarNaoLidos }: StudentsManager
       setIsLoadingAlunos(true);
       try {
         const data = await fetchStudents();
-        console.log("🕵️‍♂️ ALUNOS RECEBIDOS DO BACKEND:", data); 
         setAlunos(data);
       } catch (error) {
         console.error("Erro ao buscar alunos:", error);
@@ -49,24 +76,17 @@ export function StudentsManager({ searchTerm, mostrarNaoLidos }: StudentsManager
   };
 
   const alunosFiltrados = alunos.filter((aluno) => {
-    const matchBusca = 
+    const matchBusca =
       aluno.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       aluno.email.toLowerCase().includes(searchTerm.toLowerCase());
-                         
+
     const matchFiltroNaoLido = mostrarNaoLidos ? !aluno.visto : true;
 
     return matchBusca && matchFiltroNaoLido;
   });
 
   if (isLoadingAlunos) {
-    return (
-      <div className="flex justify-center items-center h-32 text-neutras-400">
-        <div className="flex items-center gap-2 text-sm">
-          <div className="w-4 h-4 border-2 border-neutras-500 border-t-primaria rounded-full animate-spin" />
-          Carregando alunos...
-        </div>
-      </div>
-    );
+    return <SkeletonTable />;
   }
 
   return (

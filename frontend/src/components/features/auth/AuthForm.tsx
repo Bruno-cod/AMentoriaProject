@@ -8,6 +8,7 @@ import { registerUser, loginUser } from "@/lib/services/auth";
 import { createStudent } from "@/lib/services/alunos";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CircleNotch } from "@phosphor-icons/react";
 
 import {
   Form,
@@ -25,9 +26,10 @@ import { useAuth } from "@/hooks/Auth/useAuth"
 export default function AuthForm() {
   const router = useRouter();
   const { setUser } = useAuthStore();
-   const {user} = useAuth();
+  const { user } = useAuth();
 
   const [apiError, setApiError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -53,6 +55,7 @@ export default function AuthForm() {
 
   const onSubmit = async (values: AuthFormValues) => {
     setApiError("");
+    setIsLoading(true);
 
     try {
       if (values.isCreatingAccount) {
@@ -107,6 +110,8 @@ export default function AuthForm() {
       setApiError(
         err instanceof Error ? err.message : "Erro ao conectar com o servidor.",
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -316,9 +321,17 @@ export default function AuthForm() {
             <div className="pt-4 flex flex-col gap-3">
               <Button
                 type="submit"
-                className="w-full rounded-xl text-body-small h-12 hover:opacity-90 active:scale-[0.98]"
+                disabled={isLoading}
+                className="w-full rounded-xl text-body-small h-12 hover:opacity-90 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {isCreatingAccount ? "Criar minha conta" : "Entrar"}
+                {isLoading ? (
+                  <>
+                    <CircleNotch size={18} className="animate-spin" />
+                    {isCreatingAccount ? "Criando conta..." : "Entrando..."}
+                  </>
+                ) : (
+                  isCreatingAccount ? "Criar minha conta" : "Entrar"
+                )}
               </Button>
             </div>
           </form>

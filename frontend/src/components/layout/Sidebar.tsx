@@ -28,6 +28,14 @@ interface SidebarProps {
   mobileActionBarSlot?: React.ReactNode;
 }
 
+// Skeleton para itens do histórico/arquivos
+const SkeletonItem = () => (
+  <div className="flex flex-col gap-1.5 p-3 rounded-2xl animate-pulse">
+    <div className="h-3.5 bg-neutras-700 rounded-full w-4/5" />
+    <div className="h-2.5 bg-neutras-800 rounded-full w-2/5" />
+  </div>
+);
+
 export const Sidebar = ({
   onClose,
   onUploadClick,
@@ -37,37 +45,39 @@ export const Sidebar = ({
   const [history, setHistory] = useState<ChatHistoryData[]>([]);
   const [recentFiles, setRecentFiles] = useState<KnowledgeFile[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [isLoadingFiles, setIsLoadingFiles] = useState(false);
 
   const [isExpanded, setIsExpanded] = useState(true);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedChat, setSelectedChat] = useState<ChatHistoryData | null>(
-    null,
-  );
+  const [selectedChat, setSelectedChat] = useState<ChatHistoryData | null>(null);
 
-  const {logout } = useAuthStore();
-
+  const { logout } = useAuthStore();
   const { user } = useAuth();
-
   const router = useRouter();
 
   const loadHistory = async () => {
     if (!user?.email) return;
-
+    setIsLoadingHistory(true);
     try {
       const data = await fetchStudentHistory(user.email);
       setHistory(data);
     } catch (err) {
       console.error("Erro ao carregar histórico da API:", err);
+    } finally {
+      setIsLoadingHistory(false);
     }
   };
 
   const loadRecentFiles = async () => {
+    setIsLoadingFiles(true);
     try {
       const data = await fetchKnowledgeFiles();
       setRecentFiles(data.slice(-5).reverse());
     } catch (err) {
       console.error("Erro ao carregar arquivos recentes:", err);
+    } finally {
+      setIsLoadingFiles(false);
     }
   };
 
@@ -90,11 +100,12 @@ export const Sidebar = ({
     };
 
     handleResize();
-
     window.addEventListener("resize", handleResize);
-
     window.addEventListener("historyUpdated", loadHistory);
-    return () => window.removeEventListener("historyUpdated", loadHistory);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("historyUpdated", loadHistory);
+    };
   }, [user?.role, user?.email]);
 
   const handleNewChat = () => {
@@ -179,38 +190,55 @@ export const Sidebar = ({
               )}
 
               <nav className="flex flex-col gap-2 w-full">
-                {recentFiles.length === 0
-                  ? isExpanded && (
-                      <span className="text-neutras-500 text-xs px-2 italic">
-                        Nenhum arquivo recente.
-                      </span>
-                    )
-                  : recentFiles.map((file) => (
-                      <div
-                        key={file.id}
-                        onClick={onManageFilesClick}
-                        className={`group flex flex-col rounded-2xl hover:bg-neutras-800 transition-colors cursor-pointer border border-transparent hover:border-neutras-700 ${isExpanded ? "p-3" : "p-3 items-center"}`}
-                        title={file.name}
-                      >
-                        <div className="flex items-center gap-2">
-                          <FileText
-                            size={isExpanded ? 16 : 20}
-                            className="text-neutras-400 shrink-0"
-                            weight="fill"
-                          />
-                          {isExpanded && (
-                            <span className="text-neutras-50 text-sm font-medium truncate">
-                              {file.name}
-                            </span>
-                          )}
-                        </div>
+                {isLoadingFiles ? (
+                  // Skeleton de arquivos
+                  isExpanded ? (
+                    <>
+                      <SkeletonItem />
+                      <SkeletonItem />
+                      <SkeletonItem />
+                    </>
+                  ) : (
+                    <div className="flex flex-col gap-3 items-center">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="w-8 h-8 bg-neutras-700 rounded-xl animate-pulse" />
+                      ))}
+                    </div>
+                  )
+                ) : recentFiles.length === 0 ? (
+                  isExpanded && (
+                    <span className="text-neutras-500 text-xs px-2 italic">
+                      Nenhum arquivo recente.
+                    </span>
+                  )
+                ) : (
+                  recentFiles.map((file) => (
+                    <div
+                      key={file.id}
+                      onClick={onManageFilesClick}
+                      className={`group flex flex-col rounded-2xl hover:bg-neutras-800 transition-colors cursor-pointer border border-transparent hover:border-neutras-700 ${isExpanded ? "p-3" : "p-3 items-center"}`}
+                      title={file.name}
+                    >
+                      <div className="flex items-center gap-2">
+                        <FileText
+                          size={isExpanded ? 16 : 20}
+                          className="text-neutras-400 shrink-0"
+                          weight="fill"
+                        />
                         {isExpanded && (
-                          <span className="text-neutras-500 text-[10px] ml-6 mt-1">
-                            {formatShortDate(file.uploadDate)}
+                          <span className="text-neutras-50 text-sm font-medium truncate">
+                            {file.name}
                           </span>
                         )}
                       </div>
-                    ))}
+                      {isExpanded && (
+                        <span className="text-neutras-500 text-[10px] ml-6 mt-1">
+                          {formatShortDate(file.uploadDate)}
+                        </span>
+                      )}
+                    </div>
+                  ))
+                )}
               </nav>
             </div>
           </>
@@ -236,40 +264,58 @@ export const Sidebar = ({
               )}
 
               <nav className="flex flex-col gap-2 w-full">
-                {history.length === 0
-                  ? isExpanded && (
-                      <span className="text-neutras-500 text-xs px-2 italic">
-                        Nenhuma dúvida recente.
-                      </span>
-                    )
-                  : history.map((item) => (
-                      <div
-                        key={item.id}
-                        onClick={() => handleOpenHistory(item)}
-                        className={`group flex flex-col rounded-2xl hover:bg-neutras-800 transition-colors cursor-pointer border border-transparent hover:border-neutras-700 ${isExpanded ? "p-3" : "p-3 items-center"}`}
-                        title={item.topic}
-                      >
-                        <div className="flex items-center gap-2">
-                          {!isExpanded && (
-                            <ChatTeardrop
-                              size={20}
-                              className="text-neutras-400 shrink-0"
-                              weight="fill"
-                            />
-                          )}
-                          {isExpanded && (
-                            <span className="text-neutras-50 text-sm font-medium truncate">
-                              {item.topic}
-                            </span>
-                          )}
-                        </div>
+                {isLoadingHistory ? (
+                  // Skeleton do histórico
+                  isExpanded ? (
+                    <>
+                      <SkeletonItem />
+                      <SkeletonItem />
+                      <SkeletonItem />
+                      <SkeletonItem />
+                    </>
+                  ) : (
+                    <div className="flex flex-col gap-3 items-center">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="w-8 h-8 bg-neutras-700 rounded-xl animate-pulse" />
+                      ))}
+                    </div>
+                  )
+                ) : history.length === 0 ? (
+                  isExpanded && (
+                    <span className="text-neutras-500 text-xs px-2 italic">
+                      Nenhuma dúvida recente.
+                    </span>
+                  )
+                ) : (
+                  history.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => handleOpenHistory(item)}
+                      className={`group flex flex-col rounded-2xl hover:bg-neutras-800 transition-colors cursor-pointer border border-transparent hover:border-neutras-700 ${isExpanded ? "p-3" : "p-3 items-center"}`}
+                      title={item.topic}
+                    >
+                      <div className="flex items-center gap-2">
+                        {!isExpanded && (
+                          <ChatTeardrop
+                            size={20}
+                            className="text-neutras-400 shrink-0"
+                            weight="fill"
+                          />
+                        )}
                         {isExpanded && (
-                          <span className="text-neutras-500 text-[10px] mt-1">
-                            {formatShortDate(item.date)}
+                          <span className="text-neutras-50 text-sm font-medium truncate">
+                            {item.topic}
                           </span>
                         )}
                       </div>
-                    ))}
+                      {isExpanded && (
+                        <span className="text-neutras-500 text-[10px] mt-1">
+                          {formatShortDate(item.date)}
+                        </span>
+                      )}
+                    </div>
+                  ))
+                )}
               </nav>
             </div>
           </>

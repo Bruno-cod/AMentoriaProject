@@ -1,6 +1,6 @@
 # models/models.py
 import uuid
-from sqlalchemy import Column, String, Text, Boolean, JSON
+from sqlalchemy import Column, String, Text, Boolean, JSON, Integer
 from core.database import Base
 
 def generate_uuid():
@@ -64,3 +64,13 @@ class ArquivoConhecimento(Base):
     name = Column(String)
     size = Column(String, default="0 KB")
     upload_date = Column(String)
+
+class UsageLimitDiario(Base):
+   
+    __tablename__ = "usage_limit_diario"
+ 
+    id = Column(String, primary_key=True, default=generate_uuid)
+    aluno_email = Column(String, unique=True, index=True, nullable=False)
+    data = Column(String, nullable=False)          # Data atual (YYYY-MM-DD)
+    total_interacoes = Column(Integer, default=0)  # Contador de interações do dia
+ 
